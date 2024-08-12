@@ -145,3 +145,15 @@ Individual: {
 			'''
 	}
 }
+
+Configs: {
+	ArmorDetailedConfig: {
+		DisplayName: Client Config
+		Headers.Tooltips: Tooltips
+
+		ArmorDetailsToggle: {
+			Label: More detailed armor stat comparison
+			Tooltip: Shows the difference between stats that the equipped item provides even if the hovered item does not provide them
+		}
+	}
+}
