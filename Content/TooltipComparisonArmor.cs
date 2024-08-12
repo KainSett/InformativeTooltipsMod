@@ -8,6 +8,7 @@ using InformativeTooltips.GlobalTooltips;
 using Terraria.Localization;
 using System.Linq;
 using Microsoft.Xna.Framework.Input;
+using InformativeTooltips.Common.Configs;
 
 namespace InformativeTooltips.Content
 {
@@ -440,7 +441,7 @@ namespace InformativeTooltips.Content
                     }
                     if (!IsEquippedNull)
                     {
-                        AddingNonexistent(tooltips, item, equipped);
+                        if (ModContent.GetInstance<ArmorDetailedConfig>().ArmorDetailsToggle == true) { AddingNonexistent(tooltips, item, equipped); }
                     }
                 }
             }
