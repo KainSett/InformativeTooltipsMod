@@ -1,0 +1,4 @@
+displayName = Informative Tooltips Mod
+author = KainSett
+version = 0.1
+side = Client
