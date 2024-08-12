@@ -233,15 +233,19 @@ namespace InformativeTooltips.Content
             // WordNumber
             if (WordNumber == "")
             {
-                Regex number = new Regex(@"\d+%?");
-                WordNumber = number.Match(Line).Value;
                 if (Line.Contains($"{life} {regeneration}"))
                 {
                     WordNumber = Grants;
                     if (Line.Contains(minor) || Line.Contains(minor.Replace(minor.First().ToString(), string.Empty))) { WordInc = minor; }
                     else if (Line.Contains(massive) || Line.Contains(massive.Replace(massive.First().ToString(), string.Empty))) { WordInc = massive; }
                     else if (Line.Contains(slight) || Line.Contains(slight.Replace(slight.First().ToString(), string.Empty))) { WordInc = slight; }
+                    else if (Line.Contains("0")) { WordInc = "0"; }
                     else { WordInc = increased; }
+                }
+                else
+                {
+                    Regex number = new Regex(@"\d+%?");
+                    WordNumber = number.Match(Line).Value;
                 }
                 if (WordNumber == "") { WordNumber = prevWordNumber; }
             }
@@ -273,6 +277,7 @@ namespace InformativeTooltips.Content
                     if (WordInc == massive) { perS = 4; }
                     else if (WordInc == minor) { perS = 1; }
                     else if (WordInc == slight) { perS = 0.5; }
+                    else if (WordInc == "0") { perS = 0; }
                     AddNum = $"{perS} {hps}";
                 }
                 if (IsCur)
@@ -479,6 +484,13 @@ namespace InformativeTooltips.Content
                 if (DoAdd == true)
                 {
                     var ToAdd = line.Text;
+                    if (ToAdd.Contains(life))
+                    {
+                        if (ToAdd.Contains(increased)) { ToAdd = ToAdd.Replace(increased, "0"); }
+                        if (ToAdd.Contains(minor)) { ToAdd = ToAdd.Replace(minor, "0"); }
+                        if (ToAdd.Contains(massive)) { ToAdd = ToAdd.Replace(massive, "0"); }
+                        if (ToAdd.Contains(slight)) { ToAdd = ToAdd.Replace(slight, "0"); }
+                    }
                     ToAdd = Regex.Replace(ToAdd, @"\d", "0");
                     ToAdd = Regex.Replace(ToAdd, @"0+", "0");
                     tooltips.Add(new TooltipLine(Mod, "AddedComparison", ToAdd));
