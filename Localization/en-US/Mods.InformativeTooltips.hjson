@@ -156,5 +156,20 @@ Configs: {
 			Label: More detailed armor stat comparison
 			Tooltip: Shows the difference between stats that the equipped item provides even if the hovered item does not provide them
 		}
+
+		ArmorCompare: {
+			Label: Armor stat comparison
+			Tooltip: Shows the difference between stats of the hovered armor compared to currently equipped one
+		}
+
+		AccessoryStatsToggle: {
+			Label: Accessory stats
+			Tooltip: Shows the stats of accessories in more detail
+		}
+
+		BuffDetailsToggle: {
+			Label: Buff Details
+			Tooltip: Shows the effects of buffs and items that grant them in more detail
+		}
 	}
 }

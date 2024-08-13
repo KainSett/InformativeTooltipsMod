@@ -8,6 +8,7 @@ using Terraria;
 using System;
 using Terraria.GameInput;
 using System.Linq;
+using InformativeTooltips.Common.Configs;
 namespace InformativeTooltips.Content.BetterTooltips
 {
     public class Food : GlobalItem
@@ -15,7 +16,7 @@ namespace InformativeTooltips.Content.BetterTooltips
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)
         {
-            return entity.buffType == BuffID.WellFed || entity.buffType == BuffID.WellFed2 || entity.buffType == BuffID.WellFed3;
+            return ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true && (entity.buffType == BuffID.WellFed || entity.buffType == BuffID.WellFed2 || entity.buffType == BuffID.WellFed3);
         }
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
@@ -51,7 +52,7 @@ namespace InformativeTooltips.Content.BetterTooltips
     {
         public override void ModifyBuffText(int type, ref string buffName, ref string tip, ref int rare)
         {
-            if (type == BuffID.WellFed || type == BuffID.WellFed2 || type == BuffID.WellFed3)
+            if (ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true && (type == BuffID.WellFed || type == BuffID.WellFed2 || type == BuffID.WellFed3))
             {
                 var SHIFTINFO = Language.GetTextValue("Mods.InformativeTooltips.Special.shift");
                 tip = $"{tip}\n{SHIFTINFO}";
@@ -69,7 +70,7 @@ namespace InformativeTooltips.Content.BetterTooltips
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item item, bool lateInstantiation)
         {
-            return item.createTile == TileID.Campfire;
+            return ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true && item.createTile == TileID.Campfire;
         }
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
@@ -83,7 +84,7 @@ namespace InformativeTooltips.Content.BetterTooltips
     {
         public override void ModifyBuffText(int type, ref string buffName, ref string tip, ref int rare)
         {
-            if (type == BuffID.Campfire) { tip = Language.GetTextValue("Mods.InformativeTooltips.Buffs.RegenSlight.Tooltip") + "\n" + string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.NatRegenMult.Tooltip"), 1.1); }
+            if (ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true && type == BuffID.Campfire) { tip = Language.GetTextValue("Mods.InformativeTooltips.Buffs.RegenSlight.Tooltip") + "\n" + string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.NatRegenMult.Tooltip"), 1.1); }
         }
     }
     public class CatBast : GlobalItem
@@ -91,7 +92,7 @@ namespace InformativeTooltips.Content.BetterTooltips
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item item, bool lateInstantiation)
         {
-            return item.type == ItemID.CatBast;
+            return ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true && item.type == ItemID.CatBast;
         }
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
@@ -105,7 +106,7 @@ namespace InformativeTooltips.Content.BetterTooltips
     {
         public override void ModifyBuffText(int type, ref string buffName, ref string tip, ref int rare)
         {
-            if (type == BuffID.CatBast)
+            if (ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true && type == BuffID.CatBast)
             {
                 tip = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.DefenseInc.Tooltip"), 5);
             }
@@ -127,8 +128,15 @@ namespace InformativeTooltips.Content.BetterTooltips
             tooltips.Insert(3, new TooltipLine(Mod, "BOC2", Language.GetTextValue("Mods.InformativeTooltips.Individual.BoC.basetooltip2")));
             var SHIFTINFO = new TooltipLine(Mod, "HideDescription", Language.GetTextValue("Mods.InformativeTooltips.Special.shift"));
             SHIFTINFO.OverrideColor = Color.LightSkyBlue;
-            tooltips.Insert(2, SHIFTINFO);
-            if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
+            int index = tooltips.FindIndex(line => line.Name == "Material");
+            if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Equipable"); }
+            if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Defense") - 2; }
+            if (!item.social && index != -1 && ModContent.GetInstance<ArmorDetailedConfig>().AccessoryStatsToggle == true)
+            {
+                tooltips.Insert(++index, SHIFTINFO);
+            }
+
+            if ((Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift)) && ModContent.GetInstance<ArmorDetailedConfig>().AccessoryStatsToggle == true)
             {
                 tooltips.Clear();
                 var Prov = new TooltipLine(Mod, "BOC4", Language.GetTextValue("Mods.InformativeTooltips.Individual.BoC.Tooltip2"));
@@ -172,7 +180,7 @@ namespace InformativeTooltips.Content.BetterTooltips
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)
         {
-            return entity.type == ItemID.AnkhShield || entity.type == ItemID.AnkhCharm;
+            return (entity.type == ItemID.AnkhShield || entity.type == ItemID.AnkhCharm);
         }
         public string shift = Language.GetTextValue("Mods.InformativeTooltips.Special.shift");
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
@@ -180,17 +188,17 @@ namespace InformativeTooltips.Content.BetterTooltips
 
             var SHIFTINFO = new TooltipLine(Mod, "HideDescription", shift);
             SHIFTINFO.OverrideColor = Color.LightSkyBlue;
-            int index = tooltips.FindIndex(line => line.Name == "Material") + 1;
-            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Defense") + 1; }
-            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Equipable") + 1; }
-            if (!item.social && index != -1)
+            int index = tooltips.FindIndex(line => line.Name == "Material");
+            if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Defense"); }
+            if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Equipable"); }
+            if (!item.social && index != -1 && ModContent.GetInstance<ArmorDetailedConfig>().AccessoryStatsToggle == true)
             {
-                tooltips.Insert(index, SHIFTINFO);
+                tooltips.Insert(++index, SHIFTINFO);
             }
             tooltips.Insert(++index, new TooltipLine(Mod, "Immunities", Language.GetTextValue("Mods.InformativeTooltips.Individual.Ankh.basetooltip")));
             tooltips.RemoveAt(++index);
             if (item.type == ItemID.AnkhShield) { tooltips.RemoveAt(index); }
-            if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
+            if ((Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift)) && ModContent.GetInstance<ArmorDetailedConfig>().AccessoryStatsToggle == true)
             {
                 tooltips.Clear();
                 var Provides = new TooltipLine(Mod, "ProvidesTo", Language.GetTextValue("Mods.InformativeTooltips.Individual.Ankh.providesto"));
@@ -214,46 +222,14 @@ namespace InformativeTooltips.Content.BetterTooltips
 
             var SHIFTINFO = new TooltipLine(Mod, "HideDescription", shift);
             SHIFTINFO.OverrideColor = Color.LightSkyBlue;
-            int index = tooltips.FindIndex(line => line.Name == "Material") + 1;
-            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Equipable") + 1; }
-            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Defense") - 1; }
-            if (!item.social && index != -1)
+            int index = tooltips.FindIndex(line => line.Name == "Material");
+            if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Equipable"); }
+            if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Defense") - 2; }
+            if (!item.social && index != -1 && ModContent.GetInstance<ArmorDetailedConfig>().AccessoryStatsToggle == true)
             {
-                tooltips.Insert(index, SHIFTINFO);
+                tooltips.Insert(++index, SHIFTINFO);
             }
-            if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
-            {
-                tooltips.Clear();
-                var Provides = new TooltipLine(Mod, "NightTimeOnly", Language.GetTextValue("Mods.InformativeTooltips.Special.night"));
-                Provides.OverrideColor = Color.LightGreen;
-                tooltips.Add(Provides);
-                tooltips.Add(new(Mod, "MoonCharm", string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.Werewolf.Tooltip"), 3, 2, 5.1, 5.1, 5)));
-                tooltips.Add(new(Mod, "RegenSlight", Language.GetTextValue("Mods.InformativeTooltips.Buffs.RegenSlight.Tooltip")));
-            }
-        }
-    }
-    public class MoonShell : GlobalItem
-    {
-        public override bool InstancePerEntity => true;
-        public override bool AppliesToEntity(Item entity, bool lateInstantiation)
-        {
-            return entity.type == ItemID.MoonCharm;
-        }
-        public string shift = Language.GetTextValue("Mods.InformativeTooltips.Special.shift");
-        public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
-        {
-
-            var SHIFTINFO = new TooltipLine(Mod, "HideDescription", shift);
-            SHIFTINFO.OverrideColor = Color.LightSkyBlue;
-            int index = tooltips.FindIndex(line => line.Name == "Material") + 1;
-            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Equipable") + 1; }
-            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Defense") - 1; }
-            if (!item.social && index != -1)
-            {
-                tooltips.Insert(index, SHIFTINFO);
-            }
-            tooltips.RemoveAt(++index);
-            if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
+            if ((Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift)) && ModContent.GetInstance<ArmorDetailedConfig>().AccessoryStatsToggle == true)
             {
                 tooltips.Clear();
                 var Provides = new TooltipLine(Mod, "NightTimeOnly", Language.GetTextValue("Mods.InformativeTooltips.Special.night"));
@@ -276,16 +252,16 @@ namespace InformativeTooltips.Content.BetterTooltips
         {
             var SHIFTINFO = new TooltipLine(Mod, "HideDescription", shift);
             SHIFTINFO.OverrideColor = Color.LightSkyBlue;
-            int index = tooltips.FindIndex(line => line.Name == "Material") + 1;
-            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Equipable") + 1; }
-            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Defense") - 1; }
-            if (!item.social && index != -1)
+            int index = tooltips.FindIndex(line => line.Name == "Material");
+            if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Equipable"); }
+            if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Defense") - 2; }
+            if (!item.social && index != -1 && ModContent.GetInstance<ArmorDetailedConfig>().AccessoryStatsToggle == true)
             {
-                tooltips.Insert(index, SHIFTINFO);
+                tooltips.Insert(++index, SHIFTINFO);
             }
             tooltips.Insert(++index, new TooltipLine(Mod, "MerefolkWater", Language.GetTextValue("Mods.InformativeTooltips.Special.merefolk")));
             tooltips.RemoveAt(++index);
-            if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
+            if ((Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift)) && ModContent.GetInstance<ArmorDetailedConfig>().AccessoryStatsToggle == true)
             {
                 tooltips.Clear();
                 var Provides = new TooltipLine(Mod, "Underwater", Language.GetTextValue("Mods.InformativeTooltips.Special.underwater"));
@@ -315,7 +291,7 @@ namespace InformativeTooltips.Content.BetterTooltips
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item item, bool lateInstantiation)
         {
-            return item.type == ItemID.CelestialShell || item.type == ItemID.MoonStone || item.type == ItemID.SunStone || item.type == ItemID.CelestialStone || item.type == ItemID.MoonShell;
+            return (item.type == ItemID.CelestialShell || item.type == ItemID.MoonStone || item.type == ItemID.SunStone || item.type == ItemID.CelestialStone || item.type == ItemID.MoonShell);
         }
         public string incstats = Language.GetTextValue("Mods.InformativeTooltips.Special.incstats");
         public string shift = Language.GetTextValue("Mods.InformativeTooltips.Special.shift");
@@ -331,7 +307,7 @@ namespace InformativeTooltips.Content.BetterTooltips
         {
             if (!item.social)
             {
-                if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
+                if ((Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift)) && ModContent.GetInstance<ArmorDetailedConfig>().AccessoryStatsToggle == true)
                 {
                     tooltips.Clear();
                     if (item.type != ItemID.CelestialShell && item.type != ItemID.MoonShell)
@@ -437,12 +413,12 @@ namespace InformativeTooltips.Content.BetterTooltips
                 {
                     var SHIFTINFO = new TooltipLine(Mod, "HideDescription", shift);
                     SHIFTINFO.OverrideColor = Color.LightSkyBlue;
-                    int index = tooltips.FindIndex(line => line.Name == "Material") + 1;
-                    if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Equipable") + 1; }
-                    if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Defense") - 1; }
-                    if (!item.social && index != -1)
+                    int index = tooltips.FindIndex(line => line.Name == "Material");
+                    if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Equipable"); }
+                    if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Defense") - 2; }
+                    if (!item.social && index != -1 && ModContent.GetInstance<ArmorDetailedConfig>().AccessoryStatsToggle == true)
                     {
-                        tooltips.Insert(index, SHIFTINFO);
+                        tooltips.Insert(++index, SHIFTINFO);
                     }
 
                     if (item.type == ItemID.CelestialShell || item.type == ItemID.MoonShell)

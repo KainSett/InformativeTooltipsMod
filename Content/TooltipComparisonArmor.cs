@@ -16,30 +16,30 @@ namespace InformativeTooltips.Content
     public class TooltipComparisonArmor : GlobalItem
     {
         public override bool InstancePerEntity => true;
-        public override bool AppliesToEntity(Item entity, bool lateInstantiation)
+        public override bool AppliesToEntity(Item item, bool lateInstantiation)
         {
-            return !entity.accessory;
+            return ModContent.GetInstance<ArmorDetailedConfig>().ArmorCompare == true && !item.social && !item.accessory && !item.vanity;
         }
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
             var player = Main.LocalPlayer;
 
-            var currentArmorDefense = player.armor[0].defense;
+            var currentHelmetDefense = player.armor[0].defense;
             var currentChestplateDefense = player.armor[1].defense;
             var currentLeggingsDefense = player.armor[2].defense;
             if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
             {
-                if (item.headSlot != -1)
+                if (item.headSlot != -1 && !player.armor[0].IsAir)
                 {
-                    var defenseDifference = item.defense - currentArmorDefense;
+                    var defenseDifference = item.defense - currentHelmetDefense;
                     AddDefenseComparisonTooltip(tooltips, defenseDifference);
                 }
-                else if (item.bodySlot != -1)
+                else if (item.bodySlot != -1 && !player.armor[1].IsAir)
                 {
                     var defenseDifference = item.defense - currentChestplateDefense;
                     AddDefenseComparisonTooltip(tooltips, defenseDifference);
                 }
-                else if (item.legSlot != -1)
+                else if (item.legSlot != -1 && !player.armor[2].IsAir)
                 {
                     var defenseDifference = item.defense - currentLeggingsDefense;
                     AddDefenseComparisonTooltip(tooltips, defenseDifference);
@@ -138,7 +138,7 @@ namespace InformativeTooltips.Content
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item item, bool lateInstantiation)
         {
-            return !item.accessory && !item.vanity && (item.headSlot != -1 || item.bodySlot != -1 || item.legSlot != -1);
+            return !item.social && !item.accessory && !item.vanity && (item.headSlot != -1 || item.bodySlot != -1 || item.legSlot != -1);
         }
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
@@ -157,7 +157,7 @@ namespace InformativeTooltips.Content
             LineSeparation(item, tooltips);
             LineSeparation(item, tooltips);
             // call for Tooltip Reading
-            TooltipReading(item, tooltips);
+            if (ModContent.GetInstance<ArmorDetailedConfig>().ArmorCompare == true) { TooltipReading(item, tooltips); }
 
             var AggroLine = new TooltipLine(Mod, "Aggro Line", storedAggro);
             if (storedAggro != "") { tooltips.Add(AggroLine); }
@@ -374,6 +374,7 @@ namespace InformativeTooltips.Content
             if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Equipable") + 1; }
             if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Defense") - 1; }
             if (!item.social && index != -1) { tooltips.Insert(index, SHIFTINFO);
+
                 if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
                 {
                     tooltips.Remove(SHIFTINFO);
