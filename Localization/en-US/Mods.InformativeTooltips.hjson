@@ -58,6 +58,7 @@ Items: {
 	HuntressSuit.Tooltip2: 10% chance to save ammo
 	PlacedNearby.Tooltip: Provides following effects when placed nearby:
 	AegisVanilla: by 4
+	ArmorCompare: In comparison to equipped:
 }
 
 Buffs: {

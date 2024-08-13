@@ -177,13 +177,19 @@ namespace InformativeTooltips.Content.BetterTooltips
         public string shift = Language.GetTextValue("Mods.InformativeTooltips.Special.shift");
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
-            int x = tooltips.Last().IsModifier ? 1 : 0;
+
             var SHIFTINFO = new TooltipLine(Mod, "HideDescription", shift);
             SHIFTINFO.OverrideColor = Color.LightSkyBlue;
-            tooltips.RemoveAt(tooltips.Count - 1 - x);
-            tooltips.RemoveAt(tooltips.Count - 1 - x);
-            tooltips.Insert(tooltips.Count - x, SHIFTINFO);
-            tooltips.Insert(tooltips.Count - x, new TooltipLine(Mod, "Immunities", Language.GetTextValue("Mods.InformativeTooltips.Individual.Ankh.basetooltip")));
+            int index = tooltips.FindIndex(line => line.Name == "Material") + 1;
+            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Defense") + 1; }
+            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Equipable") + 1; }
+            if (!item.social && index != -1)
+            {
+                tooltips.Insert(index, SHIFTINFO);
+            }
+            tooltips.Insert(++index, new TooltipLine(Mod, "Immunities", Language.GetTextValue("Mods.InformativeTooltips.Individual.Ankh.basetooltip")));
+            tooltips.RemoveAt(++index);
+            if (item.type == ItemID.AnkhShield) { tooltips.RemoveAt(index); }
             if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
             {
                 tooltips.Clear();
@@ -205,10 +211,16 @@ namespace InformativeTooltips.Content.BetterTooltips
         public string shift = Language.GetTextValue("Mods.InformativeTooltips.Special.shift");
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
-            int x = tooltips.Last().IsModifier ? 1 : 0;
+
             var SHIFTINFO = new TooltipLine(Mod, "HideDescription", shift);
             SHIFTINFO.OverrideColor = Color.LightSkyBlue;
-            tooltips.Insert(tooltips.Count - 1 - x, SHIFTINFO);
+            int index = tooltips.FindIndex(line => line.Name == "Material") + 1;
+            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Equipable") + 1; }
+            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Defense") - 1; }
+            if (!item.social && index != -1)
+            {
+                tooltips.Insert(index, SHIFTINFO);
+            }
             if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
             {
                 tooltips.Clear();
@@ -230,11 +242,17 @@ namespace InformativeTooltips.Content.BetterTooltips
         public string shift = Language.GetTextValue("Mods.InformativeTooltips.Special.shift");
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
-            int x = tooltips.Last().IsModifier ? 1 : 0;
+
             var SHIFTINFO = new TooltipLine(Mod, "HideDescription", shift);
             SHIFTINFO.OverrideColor = Color.LightSkyBlue;
-            tooltips.Insert(tooltips.Count - 1 - x, SHIFTINFO);
-            tooltips.RemoveAt(tooltips.Count - 2 - x);
+            int index = tooltips.FindIndex(line => line.Name == "Material") + 1;
+            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Equipable") + 1; }
+            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Defense") - 1; }
+            if (!item.social && index != -1)
+            {
+                tooltips.Insert(index, SHIFTINFO);
+            }
+            tooltips.RemoveAt(++index);
             if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
             {
                 tooltips.Clear();
@@ -256,12 +274,17 @@ namespace InformativeTooltips.Content.BetterTooltips
         public string shift = Language.GetTextValue("Mods.InformativeTooltips.Special.shift");
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
-            int x = tooltips.Last().IsModifier ? 1 : 0;
             var SHIFTINFO = new TooltipLine(Mod, "HideDescription", shift);
             SHIFTINFO.OverrideColor = Color.LightSkyBlue;
-            tooltips.Insert(tooltips.Count - 1 - x, SHIFTINFO);
-            tooltips.Insert(tooltips.Count - x, new TooltipLine(Mod, "MerefolkWater", Language.GetTextValue("Mods.InformativeTooltips.Special.merefolk")));
-            tooltips.RemoveAt(tooltips.Count - 2 - x);
+            int index = tooltips.FindIndex(line => line.Name == "Material") + 1;
+            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Equipable") + 1; }
+            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Defense") - 1; }
+            if (!item.social && index != -1)
+            {
+                tooltips.Insert(index, SHIFTINFO);
+            }
+            tooltips.Insert(++index, new TooltipLine(Mod, "MerefolkWater", Language.GetTextValue("Mods.InformativeTooltips.Special.merefolk")));
+            tooltips.RemoveAt(++index);
             if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
             {
                 tooltips.Clear();
@@ -412,10 +435,16 @@ namespace InformativeTooltips.Content.BetterTooltips
                 }
                 else
                 {
-                    int x = tooltips.Last().IsModifier ? 1 : 0;
                     var SHIFTINFO = new TooltipLine(Mod, "HideDescription", shift);
                     SHIFTINFO.OverrideColor = Color.LightSkyBlue;
-                    tooltips.Insert(tooltips.Count - x, SHIFTINFO);
+                    int index = tooltips.FindIndex(line => line.Name == "Material") + 1;
+                    if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Equipable") + 1; }
+                    if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Defense") - 1; }
+                    if (!item.social && index != -1)
+                    {
+                        tooltips.Insert(index, SHIFTINFO);
+                    }
+
                     if (item.type == ItemID.CelestialShell || item.type == ItemID.MoonShell)
                     {
                         var MoonStoneLine = new TooltipLine(Mod, "MoonStoneLine", incstats);
@@ -423,42 +452,42 @@ namespace InformativeTooltips.Content.BetterTooltips
                         var MerefolkLine = new TooltipLine(Mod, "MerefolkLine", merefolk);
 
 
-                        if (item.type == ItemID.CelestialShell) { tooltips.Insert(tooltips.Count - x, MoonStoneLine); }
-                        tooltips.Insert(tooltips.Count - x, WerewolfLine);
-                        tooltips.Insert(tooltips.Count - x, MerefolkLine);
+                        if (item.type == ItemID.CelestialShell) { tooltips.Insert(++index, MoonStoneLine); }
+                        tooltips.Insert(++index, WerewolfLine);
+                        tooltips.Insert(++index, MerefolkLine);
                         if (item.type == ItemID.CelestialShell)
                         {
-                            tooltips.RemoveAt(tooltips.Count - 5 - x);
-                            tooltips.RemoveAt(tooltips.Count - 5 - x);
-                            tooltips.RemoveAt(tooltips.Count - 5 - x);
-                            tooltips.RemoveAt(tooltips.Count - 5 - x);
-                            tooltips.RemoveAt(tooltips.Count - 5 - x);
+                            tooltips.RemoveAt(++index);
+                            tooltips.RemoveAt(++index);
+                            tooltips.RemoveAt(++index);
+                            tooltips.RemoveAt(--index);
+                            tooltips.RemoveAt(--index);
                         }
                         else
                         {
-                            tooltips.RemoveAt(tooltips.Count - 4 - x);
+                            tooltips.RemoveAt(++index);
                         }
                     }
                     else
                     {
-                        tooltips.RemoveAt(tooltips.Count - 2 - x);
-                        tooltips.RemoveAt(tooltips.Count - 2 - x);
-                        tooltips.RemoveAt(tooltips.Count - 2 - x);
                         if (item.type == ItemID.MoonStone)
                         {
                             var MoonStoneLine = new TooltipLine(Mod, "MoonStoneLine", $"{night.Replace(':', ',')} {incstats.ToLower()}");
-                            tooltips.Insert(tooltips.Count - x, MoonStoneLine);
+                            tooltips.Insert(++index, MoonStoneLine);
                         }
                         else if (item.type == ItemID.SunStone)
                         {
                             var SunStoneLine = new TooltipLine(Mod, "SunStoneLine", $"{day.Replace(':', ',')} {incstats.ToLower()}");
-                            tooltips.Insert(tooltips.Count - x, SunStoneLine);
+                            tooltips.Insert(++index, SunStoneLine);
                         }
                         else
                         {
                             var CStoneLine = new TooltipLine(Mod, "CStoneLine", incstats);
-                            tooltips.Insert(tooltips.Count - x, CStoneLine);
+                            tooltips.Insert(++index, CStoneLine);
                         }
+                        tooltips.RemoveAt(++index);
+                        tooltips.RemoveAt(++index);
+                        tooltips.RemoveAt(--index);
                     }
                 } 
             }

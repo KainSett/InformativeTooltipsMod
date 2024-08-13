@@ -9,6 +9,7 @@ using Terraria.Localization;
 using System.Linq;
 using Microsoft.Xna.Framework.Input;
 using InformativeTooltips.Common.Configs;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace InformativeTooltips.Content
 {
@@ -65,6 +66,28 @@ namespace InformativeTooltips.Content
             }
         }
     }
+    public class MaterialLineSwap : GlobalTooltipsBase
+    {
+        public MaterialLineSwap() : base(1) { }
+        public override bool AppliesToEntity(Item item, bool lateInstantiation)
+        {
+            return !item.accessory && !item.vanity && (item.headSlot != -1 || item.bodySlot != -1 || item.legSlot != -1);
+        }
+        public override bool InstancePerEntity => true;
+        public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
+        {
+            if (!Main.keyState.IsKeyDown(Keys.LeftShift) && !Main.keyState.IsKeyDown(Keys.RightShift))
+            {
+                int MatIndex = tooltips.FindIndex(line => line.Name == "Material");
+                if (MatIndex != -1)
+                {
+                    var Mat = tooltips[MatIndex];
+                    tooltips.RemoveAt(MatIndex);
+                    tooltips.Insert(MatIndex - 1, Mat);
+                }
+            }
+        }
+    }
     public class ThisIsTheOne : GlobalTooltipsBase
     {
         public ThisIsTheOne() : base(2) { }
@@ -115,7 +138,7 @@ namespace InformativeTooltips.Content
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item item, bool lateInstantiation)
         {
-            return !item.accessory && (item.headSlot != -1 || item.bodySlot != -1 || item.legSlot != -1);
+            return !item.accessory && !item.vanity && (item.headSlot != -1 || item.bodySlot != -1 || item.legSlot != -1);
         }
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
@@ -347,11 +370,18 @@ namespace InformativeTooltips.Content
             if (!IsEquippedNull) { equippedTooltips = GetTooltipLines(equipped); }
             var SHIFTINFO = new TooltipLine(Mod, "HideDescription", Language.GetTextValue("Mods.InformativeTooltips.Special.shift"));
             SHIFTINFO.OverrideColor = Color.LightSkyBlue;
-            int z = tooltips[1].Name == "Favorite" ? 1 : 0;
-            if (!item.social) { tooltips.Insert(2 + z, SHIFTINFO);
+            int index = tooltips.FindIndex(line => line.Name == "Material") + 1;
+            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Equipable") + 1; }
+            if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Defense") - 1; }
+            if (!item.social && index != -1) { tooltips.Insert(index, SHIFTINFO);
                 if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
                 {
                     tooltips.Remove(SHIFTINFO);
+                    var ArmorComp = new TooltipLine(Mod, "ArmorComparison", Language.GetTextValue("Mods.InformativeTooltips.Items.ArmorCompare"));
+                    ArmorComp.OverrideColor = Color.LightSkyBlue;
+                    int yea = tooltips.FindIndex(line => line.Name == "ItemName");
+                    tooltips[yea].OverrideColor = Color.Gray;
+                    tooltips.Insert(yea + 1, ArmorComp);
                     foreach (var tooltipLine in tooltips)
                     {
                         SeparatedLinesOperating(item, tooltips, tooltipLine.Text, true, false);
