@@ -18,7 +18,7 @@ namespace InformativeTooltips.Content
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item item, bool lateInstantiation)
         {
-            return ModContent.GetInstance<ArmorDetailedConfig>().ArmorCompare == true && !item.social && !item.accessory && !item.vanity;
+            return !item.social && !item.accessory && !item.vanity;
         }
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
@@ -48,21 +48,24 @@ namespace InformativeTooltips.Content
         }
         private void AddDefenseComparisonTooltip(List<TooltipLine> tooltips, int defenseDifference)
         {
-            foreach (var line in tooltips)
+            if (ModContent.GetInstance<ArmorDetailedConfig>().ArmorCompare == true)
             {
-                if (line.Name != "Defense") continue;
-                var comparisonText = "";
-                if (defenseDifference != 0)
+                foreach (var line in tooltips)
                 {
-                    comparisonText += defenseDifference > 0 ? $" (+{defenseDifference})" : $" ({defenseDifference})";
-                }
+                    if (line.Name != "Defense") continue;
+                    var comparisonText = "";
+                    if (defenseDifference != 0)
+                    {
+                        comparisonText += defenseDifference > 0 ? $" (+{defenseDifference})" : $" ({defenseDifference})";
+                    }
 
-                if (!string.IsNullOrEmpty(comparisonText))
-                {
-                    line.Text += comparisonText;
-                    line.OverrideColor = defenseDifference > 0 ? Color.LightGreen : new Color(255, 150, 150);
+                    if (!string.IsNullOrEmpty(comparisonText))
+                    {
+                        line.Text += comparisonText;
+                        line.OverrideColor = defenseDifference > 0 ? ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor : ModContent.GetInstance<ArmorDetailedConfig>().NegativeColor;
+                    }
+                    break;
                 }
-                break;
             }
         }
     }
@@ -76,7 +79,7 @@ namespace InformativeTooltips.Content
         public override bool InstancePerEntity => true;
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
-            if (!Main.keyState.IsKeyDown(Keys.LeftShift) && !Main.keyState.IsKeyDown(Keys.RightShift))
+            if (!Main.keyState.IsKeyDown(Keys.LeftShift) && !Main.keyState.IsKeyDown(Keys.RightShift) && ModContent.GetInstance<ArmorDetailedConfig>().ArmorCompare == true)
             {
                 int MatIndex = tooltips.FindIndex(line => line.Name == "Material");
                 if (MatIndex != -1)
@@ -369,7 +372,7 @@ namespace InformativeTooltips.Content
             List<TooltipLine> equippedTooltips = null;
             if (!IsEquippedNull) { equippedTooltips = GetTooltipLines(equipped); }
             var SHIFTINFO = new TooltipLine(Mod, "HideDescription", Language.GetTextValue("Mods.InformativeTooltips.Special.shift"));
-            SHIFTINFO.OverrideColor = Color.LightSkyBlue;
+            SHIFTINFO.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().HeaderColor;
             int index = tooltips.FindIndex(line => line.Name == "Material") + 1;
             if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Equipable") + 1; }
             if (index == 0) { index = tooltips.FindIndex(line => line.Name == "Defense") - 1; }
@@ -379,9 +382,9 @@ namespace InformativeTooltips.Content
                 {
                     tooltips.Remove(SHIFTINFO);
                     var ArmorComp = new TooltipLine(Mod, "ArmorComparison", Language.GetTextValue("Mods.InformativeTooltips.Items.ArmorCompare"));
-                    ArmorComp.OverrideColor = Color.LightSkyBlue;
+                    ArmorComp.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().HeaderColor;
                     int yea = tooltips.FindIndex(line => line.Name == "ItemName");
-                    tooltips[yea].OverrideColor = Color.Gray;
+                    tooltips[yea].OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().NeutralColor;
                     tooltips.Insert(yea + 1, ArmorComp);
                     foreach (var tooltipLine in tooltips)
                     {
@@ -493,7 +496,7 @@ namespace InformativeTooltips.Content
                 if (!string.IsNullOrEmpty(comparisonText))
                 {
                     line.Text += comparisonText;
-                    line.OverrideColor = difference > 0 ? Color.LightGreen : new Color(255, 150, 150);
+                    line.OverrideColor = difference > 0 ? ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor : ModContent.GetInstance<ArmorDetailedConfig>().NegativeColor;
                 }
                 break;
             }

@@ -49,6 +49,7 @@ Special: {
 	incstats: Increases various stats
 	werewolf: Turns the holder into a werewolf at night
 	merefolk: Turns the holder into a merfolk while submerged in liquid
+	grantsbuff: Grants a buff when placed nearby
 }
 
 Items: {
@@ -150,7 +151,11 @@ Individual: {
 Configs: {
 	ArmorDetailedConfig: {
 		DisplayName: Client Config
-		Headers.Tooltips: Tooltips
+
+		Headers: {
+			Tooltips: Tooltips
+			Colors: Colors
+		}
 
 		ArmorDetailsToggle: {
 			Label: More detailed armor stat comparison
@@ -170,6 +175,26 @@ Configs: {
 		BuffDetailsToggle: {
 			Label: Buff Details
 			Tooltip: Shows the effects of buffs and items that grant them in more detail
+		}
+
+		HeaderColor: {
+			Label: Header Color
+			Tooltip: The color of the lines that explain technical part of a tooltip
+		}
+
+		PositiveColor: {
+			Label: Positive Color
+			Tooltip: The color of the lines that display positive information, or those that clarify a condition of an item's effects
+		}
+
+		NegativeColor: {
+			Label: Negative Color
+			Tooltip: The color of the lines that display negative information
+		}
+
+		NeutralColor: {
+			Label: Neutral Color
+			Tooltip: The color of the lines that are less important, to shift the focus to other, more importaant lines
 		}
 	}
 }

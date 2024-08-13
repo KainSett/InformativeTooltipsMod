@@ -21,7 +21,7 @@ namespace InformativeTooltips.Content.BetterTooltips
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
             var SHIFTINFO = new TooltipLine(Mod, "HideDescription", Language.GetTextValue("Mods.InformativeTooltips.Special.shift"));
-            SHIFTINFO.OverrideColor = Color.LightBlue;
+            SHIFTINFO.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().HeaderColor;
             tooltips.Insert(2, SHIFTINFO);
             if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
             {
@@ -31,7 +31,7 @@ namespace InformativeTooltips.Content.BetterTooltips
                 if (item.buffType == BuffID.WellFed3) { tip = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.WellFed.Tooltip"), 3, 4, 10, 10, 1, 40, 15); }
                 tooltips.RemoveAt(2);
                 var Prov = new TooltipLine(Mod, "FoodBuff", Language.GetTextValue("Mods.InformativeTooltips.Special.provides"));
-                Prov.OverrideColor = Color.LightGreen;
+                Prov.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor;
                 tooltips.Insert(2, Prov);
                 tooltips.Insert(3, new(Mod, "WellFedTooltip", tip));
                 if (Main.expertMode)
@@ -92,14 +92,29 @@ namespace InformativeTooltips.Content.BetterTooltips
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item item, bool lateInstantiation)
         {
-            return ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true && item.type == ItemID.CatBast;
+            return item.type == ItemID.CatBast;
         }
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
-            tooltips.RemoveAt(2);
-            var BastTooltip = new TooltipLine(Mod, "BastTooltip", Language.GetTextValue("Mods.InformativeTooltips.Items.PlacedNearby.Tooltip"));
-            tooltips.Add(BastTooltip);
-            tooltips.Add(new(Mod, "BastDef", string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.DefenseInc.Tooltip"), 5)));
+            //Main.NewText($"{item.}");
+            if (ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true)
+            {
+                int index = tooltips.FindIndex(tip => tip.Name == "Tooltip0");
+                tooltips[index].Text = Language.GetTextValue("Mods.InformativeTooltips.Special.grantsbuff");
+                var SHIFTINFO = new TooltipLine(Mod, "HideDescription", Language.GetTextValue("Mods.InformativeTooltips.Special.shift"));
+                SHIFTINFO.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().HeaderColor;
+                if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
+                {
+                    tooltips.RemoveAt(--index);
+                    tooltips.RemoveAt(index);
+                    var PlacedTooltip = new TooltipLine(Mod, "PlacedNearbyTooltip", Language.GetTextValue("Mods.InformativeTooltips.Items.PlacedNearby.Tooltip"));
+                    PlacedTooltip.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor;
+                    tooltips[tooltips.FindIndex(line => line.Name == "ItemName")].OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().NeutralColor;
+                    tooltips.Insert(index, PlacedTooltip);
+                    tooltips.Insert(++index, new(Mod, "BastDef", string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.DefenseInc.Tooltip"), 5)));
+                }
+                else { tooltips.Insert(++index, SHIFTINFO); }
+            }
         }
     }
     public class CatBastBuff : GlobalBuff
@@ -127,7 +142,7 @@ namespace InformativeTooltips.Content.BetterTooltips
             tooltips.Insert(2, new TooltipLine(Mod, "BOC1", Language.GetTextValue("Mods.InformativeTooltips.Individual.BoC.basetooltip1")));
             tooltips.Insert(3, new TooltipLine(Mod, "BOC2", Language.GetTextValue("Mods.InformativeTooltips.Individual.BoC.basetooltip2")));
             var SHIFTINFO = new TooltipLine(Mod, "HideDescription", Language.GetTextValue("Mods.InformativeTooltips.Special.shift"));
-            SHIFTINFO.OverrideColor = Color.LightSkyBlue;
+            SHIFTINFO.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().HeaderColor;
             int index = tooltips.FindIndex(line => line.Name == "Material");
             if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Equipable"); }
             if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Defense") - 2; }
@@ -140,9 +155,9 @@ namespace InformativeTooltips.Content.BetterTooltips
             {
                 tooltips.Clear();
                 var Prov = new TooltipLine(Mod, "BOC4", Language.GetTextValue("Mods.InformativeTooltips.Individual.BoC.Tooltip2"));
-                Prov.OverrideColor = Color.LightGreen;
+                Prov.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor;
                 var dodgechance = new TooltipLine(Mod, "BOC3", Language.GetTextValue("Mods.InformativeTooltips.Individual.BoC.Tooltip1"));
-                dodgechance.OverrideColor = Color.LightSkyBlue;
+                dodgechance.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().NeutralColor;
                 tooltips.Add(dodgechance);
                 tooltips.Add(Prov);
                 tooltips.Add(new TooltipLine(Mod, "BOC4", Language.GetTextValue("Mods.InformativeTooltips.Individual.BoC.Tooltip3")));
@@ -187,7 +202,7 @@ namespace InformativeTooltips.Content.BetterTooltips
         {
 
             var SHIFTINFO = new TooltipLine(Mod, "HideDescription", shift);
-            SHIFTINFO.OverrideColor = Color.LightSkyBlue;
+            SHIFTINFO.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().HeaderColor;
             int index = tooltips.FindIndex(line => line.Name == "Material");
             if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Defense"); }
             if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Equipable"); }
@@ -202,7 +217,7 @@ namespace InformativeTooltips.Content.BetterTooltips
             {
                 tooltips.Clear();
                 var Provides = new TooltipLine(Mod, "ProvidesTo", Language.GetTextValue("Mods.InformativeTooltips.Individual.Ankh.providesto"));
-                Provides.OverrideColor = Color.LightGreen;
+                Provides.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor;
                 tooltips.Add(Provides);
                 if (item.type == ItemID.AnkhShield) { tooltips.Add(new(Mod, "AnkhList", Language.GetTextValue("Mods.InformativeTooltips.Individual.Ankh.shieldonly"))); }
                 tooltips.Add(new(Mod, "AnkhList", Language.GetTextValue("Mods.InformativeTooltips.Individual.Ankh.list")));
@@ -221,7 +236,7 @@ namespace InformativeTooltips.Content.BetterTooltips
         {
 
             var SHIFTINFO = new TooltipLine(Mod, "HideDescription", shift);
-            SHIFTINFO.OverrideColor = Color.LightSkyBlue;
+            SHIFTINFO.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().HeaderColor;
             int index = tooltips.FindIndex(line => line.Name == "Material");
             if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Equipable"); }
             if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Defense") - 2; }
@@ -233,7 +248,7 @@ namespace InformativeTooltips.Content.BetterTooltips
             {
                 tooltips.Clear();
                 var Provides = new TooltipLine(Mod, "NightTimeOnly", Language.GetTextValue("Mods.InformativeTooltips.Special.night"));
-                Provides.OverrideColor = Color.LightGreen;
+                Provides.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor;
                 tooltips.Add(Provides);
                 tooltips.Add(new(Mod, "MoonCharm", string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.Werewolf.Tooltip"), 3, 2, 5.1, 5.1, 5)));
                 tooltips.Add(new(Mod, "RegenSlight", Language.GetTextValue("Mods.InformativeTooltips.Buffs.RegenSlight.Tooltip")));
@@ -251,7 +266,7 @@ namespace InformativeTooltips.Content.BetterTooltips
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
             var SHIFTINFO = new TooltipLine(Mod, "HideDescription", shift);
-            SHIFTINFO.OverrideColor = Color.LightSkyBlue;
+            SHIFTINFO.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().HeaderColor;
             int index = tooltips.FindIndex(line => line.Name == "Material");
             if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Equipable"); }
             if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Defense") - 2; }
@@ -265,7 +280,7 @@ namespace InformativeTooltips.Content.BetterTooltips
             {
                 tooltips.Clear();
                 var Provides = new TooltipLine(Mod, "Underwater", Language.GetTextValue("Mods.InformativeTooltips.Special.underwater"));
-                Provides.OverrideColor = Color.LightGreen;
+                Provides.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor;
                 tooltips.Add(Provides);
                 tooltips.Add(new(Mod, "rakushka", Language.GetTextValue("Mods.InformativeTooltips.Buffs.Merefolk.Tooltip")));
             }
@@ -315,19 +330,19 @@ namespace InformativeTooltips.Content.BetterTooltips
                         if (item.type == ItemID.MoonStone)
                         {
                             var Provides = new TooltipLine(Mod, "NightTimeOnly", night);
-                            Provides.OverrideColor = Color.LightGreen;
+                            Provides.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor;
                             tooltips.Add(Provides);
                         }
                         if (item.type == ItemID.SunStone)
                         {
                             var Provides = new TooltipLine(Mod, "DayTimeOnly", day);
-                            Provides.OverrideColor = Color.LightGreen;
+                            Provides.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor;
                             tooltips.Add(Provides);
                         }
                         if (item.type == ItemID.CelestialStone)
                         {
                             var Provides = new TooltipLine(Mod, "ItemEffects", provides);
-                            Provides.OverrideColor = Color.LightGreen;
+                            Provides.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor;
                             tooltips.Add(Provides);
                         }
                         tooltips.Add(new(Mod, "MoonStats", string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.MoonStone.Tooltip"), 4, 2, 10, 10, 0.5, 15)));
@@ -366,17 +381,17 @@ namespace InformativeTooltips.Content.BetterTooltips
                         }
                         int CurrentLine = Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().Current;
                         var moveinf = new TooltipLine(Mod, "MoveWithArrows", moveinfo);
-                        moveinf.OverrideColor = Color.LightSkyBlue;
+                        moveinf.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().HeaderColor;
                         tooltips.Add(moveinf);
                         var Provides = new TooltipLine(Mod, "ProvidesCShell", provides);
-                        Provides.OverrideColor = Color.LightGreen;
+                        Provides.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor;
                         tooltips.Add(Provides);
                         var WerewolfLine = new TooltipLine(Mod, "WerewolfLine", werewolf);
-                        WerewolfLine.OverrideColor = Color.Gray;
+                        WerewolfLine.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().NeutralColor;
                         var MerefolkLine = new TooltipLine(Mod, "MerefolkLine", merefolk);
-                        MerefolkLine.OverrideColor = Color.Gray;
+                        MerefolkLine.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().NeutralColor;
                         var MoonStoneLine = new TooltipLine(Mod, "MoonStoneLine", incstats);
-                        MoonStoneLine.OverrideColor = Color.Gray;
+                        MoonStoneLine.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().NeutralColor;
 
                         if (CurrentLine == 2)
                         {
@@ -412,7 +427,7 @@ namespace InformativeTooltips.Content.BetterTooltips
                 else
                 {
                     var SHIFTINFO = new TooltipLine(Mod, "HideDescription", shift);
-                    SHIFTINFO.OverrideColor = Color.LightSkyBlue;
+                    SHIFTINFO.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().HeaderColor;
                     int index = tooltips.FindIndex(line => line.Name == "Material");
                     if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Equipable"); }
                     if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Defense") - 2; }
