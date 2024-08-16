@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using Terraria.ID;
@@ -65,21 +65,7 @@ namespace InformativeTooltips.Content.BetterTooltips
             }
         }
     }
-    public class CampFire : GlobalItem
-    {
-        public override bool InstancePerEntity => true;
-        public override bool AppliesToEntity(Item item, bool lateInstantiation)
-        {
-            return ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true && item.createTile == TileID.Campfire;
-        }
-        public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
-        {
-            tooltips.RemoveAt(2);
-            tooltips.Add(new(Mod, "CampfireTooltip", Language.GetTextValue("Mods.InformativeTooltips.Items.PlacedNearby.Tooltip")));
-            tooltips.Add(new(Mod, "CampfireTooltip2", Language.GetTextValue("Mods.InformativeTooltips.Buffs.RegenSlight.Tooltip")));
-            tooltips.Add(new(Mod, "CampfireTooltip3", string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.NatRegenMult.Tooltip"), 1.1)));
-        }
-    }
+    
     public class CampFireBuff : GlobalBuff
     {
         public override void ModifyBuffText(int type, ref string buffName, ref string tip, ref int rare)
@@ -87,35 +73,183 @@ namespace InformativeTooltips.Content.BetterTooltips
             if (ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true && type == BuffID.Campfire) { tip = Language.GetTextValue("Mods.InformativeTooltips.Buffs.RegenSlight.Tooltip") + "\n" + string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.NatRegenMult.Tooltip"), 1.1); }
         }
     }
-    public class CatBast : GlobalItem
+    public class GlobalPlaceableBuffs : GlobalItem
+    {
+        public override bool InstancePerEntity => true;
+        public virtual bool DoApply { get; set; } = false;
+        public virtual string Cond { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Special.grantsbuff");
+        public virtual string Cond2 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Special.nearby");
+        public virtual string Line1 { get; set; } = string.Empty;
+        public virtual string Line2 { get; set; } = string.Empty;
+        public override bool AppliesToEntity(Item item, bool lateInstantiation)
+        {
+            return DoApply;
+        }
+        public virtual void ToModify(Item item, List<TooltipLine> tooltips, string cond, string line1, string line2)
+        {
+            if (ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true)
+            {
+                int index = tooltips.FindIndex(tip => tip.Name == "Tooltip0");
+                if (index != -1)
+                {
+                    if (tooltips[index].Text.First() != '+' && tooltips[index].Text.First() != '-' && !Char.IsLetter(tooltips[index].Text.First()) && !Char.IsNumber(tooltips[index].Text.First())) { tooltips[index].OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().NeutralColor; ; tooltips.Insert(index, new(Mod, "Tooltip1", $"{cond} {Cond2}")); index = tooltips.FindIndex(tip => tip.Name == "Tooltip1"); }
+                    else { tooltips[index].Text = $"{cond} {Cond2}"; }
+                }
+                else { tooltips.Add(new(Mod, "Tooltip0", $"{cond} {Cond2}")); index = tooltips.FindIndex(tip => tip.Name == "Tooltip0"); }
+                var SHIFTINFO = new TooltipLine(Mod, "HideDescription", Language.GetTextValue("Mods.InformativeTooltips.Special.shift"));
+                SHIFTINFO.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().HeaderColor;
+                if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
+                {
+                    if (tooltips.FindIndex(tip => tip.Name == "Tooltip1") != -1) { tooltips[tooltips.FindIndex(tip => tip.Name == "Tooltip1")].Hide(); }
+                    foreach (var line in tooltips)
+                    {
+                        if (line.Name != "ItemName" && line.Name != "Tooltip0") { line.Hide(); }
+                    }
+                    index = tooltips.FindIndex(tip => tip.Name == "ItemName");
+                    tooltips[index].OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().NeutralColor;
+                    index = tooltips.FindIndex(tip => tip.Name == "Tooltip0");
+                    string prov = Language.GetTextValue("Mods.InformativeTooltips.Special.provides");
+                    tooltips[index].Text = prov.Insert(prov.IndexOf(':'), $" {Cond2}");
+                    tooltips[index].OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor;
+                    if (line1 != string.Empty) { var Line1 = new TooltipLine(Mod, "Tooltip1", line1); tooltips.Insert(++index, Line1); }
+                    if (line2 != string.Empty) { var Line2 = new TooltipLine(Mod, "Tooltip2", line2); tooltips.Insert(++index, Line2); }
+                }
+                else { tooltips.Insert(index, SHIFTINFO); }
+            }
+        }
+        public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
+        {
+            ToModify(item, tooltips, Cond, Line1, Line2);
+        }
+    }
+    public class GlobalCatBastTooltip : GlobalPlaceableBuffs
     {
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item item, bool lateInstantiation)
         {
             return item.type == ItemID.CatBast;
         }
-        public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
+        public override bool DoApply { get; set; } = true;
+        public override string Line1 { get; set; } = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.DefenseInc.Tooltip"), 5);
+    }
+    public class GlobalCampfireTooltip : GlobalPlaceableBuffs
+    {
+        public override bool InstancePerEntity => true;
+        public override bool AppliesToEntity(Item item, bool lateInstantiation)
         {
-            //Main.NewText($"{item.}");
-            if (ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true)
-            {
-                int index = tooltips.FindIndex(tip => tip.Name == "Tooltip0");
-                tooltips[index].Text = Language.GetTextValue("Mods.InformativeTooltips.Special.grantsbuff");
-                var SHIFTINFO = new TooltipLine(Mod, "HideDescription", Language.GetTextValue("Mods.InformativeTooltips.Special.shift"));
-                SHIFTINFO.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().HeaderColor;
-                if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
-                {
-                    tooltips.RemoveAt(--index);
-                    tooltips.RemoveAt(index);
-                    var PlacedTooltip = new TooltipLine(Mod, "PlacedNearbyTooltip", Language.GetTextValue("Mods.InformativeTooltips.Items.PlacedNearby.Tooltip"));
-                    PlacedTooltip.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor;
-                    tooltips[tooltips.FindIndex(line => line.Name == "ItemName")].OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().NeutralColor;
-                    tooltips.Insert(index, PlacedTooltip);
-                    tooltips.Insert(++index, new(Mod, "BastDef", string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.DefenseInc.Tooltip"), 5)));
-                }
-                else { tooltips.Insert(++index, SHIFTINFO); }
-            }
+            return item.createTile == TileID.Campfire || item.createTile == TileID.Fireplace;
         }
+        public override bool DoApply { get; set; } = true;
+        public override string Line1 { get; set; } = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.NatRegenMult.Tooltip"), 1.1);
+        public override string Line2 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Buffs.RegenSlight.Tooltip");
+    }
+    public class GlobalHeartLanternTooltip : GlobalPlaceableBuffs
+    {
+        public override bool InstancePerEntity => true;
+        public override bool AppliesToEntity(Item item, bool lateInstantiation)
+        {
+            return item.type == ItemID.HeartLantern;
+        }
+        public override bool DoApply { get; set; } = true;
+        public override string Line1 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Buffs.Regen1.Tooltip");
+    }
+    public class GlobalGnomeTooltip : GlobalPlaceableBuffs
+    {
+        public override bool InstancePerEntity => true;
+        public override bool AppliesToEntity(Item item, bool lateInstantiation)
+        {
+            return item.type == ItemID.GardenGnome;
+        }
+        public override bool DoApply { get; set; } = true;
+        public override string Line1 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Buffs.Gnome");
+    }
+    public class GlobalSunFlowerTooltip : GlobalPlaceableBuffs
+    {
+        public override bool InstancePerEntity => true;
+        public override bool AppliesToEntity(Item item, bool lateInstantiation)
+        {
+            return item.type == ItemID.Sunflower;
+        }
+        public override bool DoApply { get; set; } = true;
+        public override string Line1 { get; set; } = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Items.TooltipStat"), 10, Language.GetTextValue("Mods.InformativeTooltips.Class.movement"), Language.GetTextValue("Mods.InformativeTooltips.Stat.speed"));
+        public override string Line2 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Buffs.SunFlower");
+    }
+    public class GlobalStarInABottleTooltip : GlobalPlaceableBuffs
+    {
+        public override bool InstancePerEntity => true;
+        public override bool AppliesToEntity(Item item, bool lateInstantiation)
+        {
+            return item.type == ItemID.StarinaBottle;
+        }
+        public override bool DoApply { get; set; } = true;
+        public override string Line1 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Buffs.StarBottle.1");
+        public override string Line2 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Buffs.StarBottle.2");
+    }
+    public class GlobalAmmoBoxTooltip : GlobalPlaceableBuffs
+    {
+        public override bool InstancePerEntity => true;
+        public override bool AppliesToEntity(Item item, bool lateInstantiation)
+        {
+            return item.type == ItemID.AmmoBox;
+        }
+        public override bool DoApply { get; set; } = true;
+        public override string Cond2 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Special.nearby") + ' ' + Language.GetTextValue("Mods.InformativeTooltips.Special.clickbuff");
+        public override string Line1 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Buffs.AmmoBox");
+    }
+    public class GlobalCrystalBallTooltip : GlobalPlaceableBuffs
+    {
+        public override bool InstancePerEntity => true;
+        public override bool AppliesToEntity(Item item, bool lateInstantiation)
+        {
+            return item.type == ItemID.CrystalBall;
+        }
+        public override bool DoApply { get; set; } = true;
+        public override string Cond2 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Special.nearby") + ' ' + Language.GetTextValue("Mods.InformativeTooltips.Special.clickbuff");
+        public override string Line1 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Buffs.CrystalBall");
+    }
+    public class GlobalBewitchingTableTooltip : GlobalPlaceableBuffs
+    {
+        public override bool InstancePerEntity => true;
+        public override bool AppliesToEntity(Item item, bool lateInstantiation)
+        {
+            return item.type == ItemID.BewitchingTable;
+        }
+        public override bool DoApply { get; set; } = true;
+        public override string Cond2 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Special.nearby") + ' ' + Language.GetTextValue("Mods.InformativeTooltips.Special.clickbuff");
+        public override string Line1 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Buffs.BewitchingTable");
+    }
+    public class GlobalWarTableTooltip : GlobalPlaceableBuffs
+    {
+        public override bool InstancePerEntity => true;
+        public override bool AppliesToEntity(Item item, bool lateInstantiation)
+        {
+            return item.type == ItemID.WarTable;
+        }
+        public override bool DoApply { get; set; } = true;
+        public override string Cond2 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Special.nearby") + ' ' + Language.GetTextValue("Mods.InformativeTooltips.Special.clickbuff");
+        public override string Line1 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Buffs.WarTable");
+    }
+    public class GlobalSharpeningStationTooltip : GlobalPlaceableBuffs
+    {
+        public override bool InstancePerEntity => true;
+        public override bool AppliesToEntity(Item item, bool lateInstantiation)
+        {
+            return item.type == ItemID.SharpeningStation;
+        }
+        public override bool DoApply { get; set; } = true;
+        public override string Cond2 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Special.nearby") + ' ' + Language.GetTextValue("Mods.InformativeTooltips.Special.clickbuff");
+        public override string Line1 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Buffs.SharpeningStation");
+    }
+    public class GlobalSliceOfCakeTooltip : GlobalPlaceableBuffs
+    {
+        public override bool InstancePerEntity => true;
+        public override bool AppliesToEntity(Item item, bool lateInstantiation)
+        {
+            return item.type == ItemID.SliceOfCake;
+        }
+        public override bool DoApply { get; set; } = true;
+        public override string Cond2 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Special.nearby") + ' ' + Language.GetTextValue("Mods.InformativeTooltips.Special.clickbuff");
+        public override string Line1 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Buffs.SliceOfCake");
     }
     public class CatBastBuff : GlobalBuff
     {

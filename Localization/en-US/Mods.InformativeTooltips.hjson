@@ -9,6 +9,7 @@ Stat: {
 	manamax: mana by
 	minions: minions by
 	sentries: sentries by
+	luck: luck by
 }
 
 Class: {
@@ -49,7 +50,9 @@ Special: {
 	incstats: Increases various stats
 	werewolf: Turns the holder into a werewolf at night
 	merefolk: Turns the holder into a merfolk while submerged in liquid
-	grantsbuff: Grants a buff when placed nearby
+	grantsbuff: Grants a buff
+	clickbuff: and interacted with
+	nearby: when placed nearby
 }
 
 Items: {
@@ -110,6 +113,30 @@ Buffs: {
 		+{4} minion knockback
 		+{5}% mining speed
 		'''
+	CrystalBall:
+		'''
+		+20 maximum mana
+		+5% magic damage
+		+2% magic critical strike chance
+		−2% mana cost
+		'''
+	SliceOfCake:
+		'''
+		+20% movement speed
+		+20% mining speed
+		'''
+
+	StarBottle: {
+		1: Mana regeneration is increased by 5 per second
+		2: Reduced cooldown of mana regeneration after using magic weapons
+	}
+
+	SunFlower: 17% reduced enemy spawn rate
+	Gnome: Luck is increased by 0.2
+	AmmoBox: Chance to save ammo is increased by 20%
+	BewitchingTable: Maximum number of minions is increased by 1
+	WarTable: Maximum number of sentries is increased by 1
+	SharpeningStation: Armor penetration is increased by 12 (while holding a melee weapon)
 }
 
 Individual: {
