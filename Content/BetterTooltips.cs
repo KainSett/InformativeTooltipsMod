@@ -9,6 +9,7 @@ using System;
 using Terraria.GameInput;
 using System.Linq;
 using InformativeTooltips.Common.Configs;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace InformativeTooltips.Content.BetterTooltips
 {
     public class Food : GlobalItem
@@ -16,35 +17,56 @@ namespace InformativeTooltips.Content.BetterTooltips
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)
         {
-            return ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true && (entity.buffType == BuffID.WellFed || entity.buffType == BuffID.WellFed2 || entity.buffType == BuffID.WellFed3);
+            if (ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true && (entity.buffType == BuffID.WellFed || entity.buffType == BuffID.WellFed2 || entity.buffType == BuffID.WellFed3)) { return true; }
+            else return false;
         }
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
+            var pos = ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor;
             var SHIFTINFO = new TooltipLine(Mod, "HideDescription", Language.GetTextValue("Mods.InformativeTooltips.Special.shift"));
             SHIFTINFO.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().HeaderColor;
-            tooltips.Insert(2, SHIFTINFO);
+            int index = tooltips.FindIndex(line => line.Name == "Material");
+            if (index == -1) { index = tooltips.FindIndex(line => line.Name == "Consumable"); }
+            tooltips.Insert(++index, SHIFTINFO);
+            int exp = tooltips.FindIndex(line => line.Name == "WellFedExpert");
+            if (exp != -1) { tooltips.RemoveAt(exp); }
+            int d = tooltips.FindIndex(line => line.Name == "Tooltip2");
+            if (d == -1) { d = tooltips.FindIndex(line => line.Name == "Tooltip1"); }
+            if (d != -1) 
+            { 
+                var desc = tooltips[d];
+                tooltips.RemoveAt(d);
+                desc.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().NeutralColor;
+                tooltips.Add(desc);
+            }
+            int s = tooltips.FindIndex(line => line.Name == "Tooltip2") != -1 ? tooltips.FindIndex(line => line.Name == "Tooltip1") : tooltips.FindIndex(line => line.Name == "Tooltip0");
+            tooltips[s].Text = tooltips[s].Text.Replace(Language.GetTextValue("Mods.InformativeTooltips.Special.all"), Language.GetTextValue("Mods.InformativeTooltips.Special.various"));
+            int i = tooltips.FindIndex(line => line.Name == "Tooltip2") != -1 ? tooltips.FindIndex(line => line.Name == "Tooltip0") : -1;
+            if (i != -1)
+            {
+                var tip = tooltips[i];
+                tooltips.RemoveAt(i);
+                tip.OverrideColor = pos;
+                tooltips.Insert(--i, tip);
+            }
+
             if (Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift))
             {
+                tooltips.Clear();
                 string tip = "";
-                if (item.buffType == BuffID.WellFed) { tip = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.WellFed.Tooltip"), 1, 2, 5, 5, 0.5, 20, 5); }
-                if (item.buffType == BuffID.WellFed2) { tip = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.WellFed.Tooltip"), 2, 3, 7.5, 7.5, 0.75, 30, 10); }
-                if (item.buffType == BuffID.WellFed3) { tip = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.WellFed.Tooltip"), 3, 4, 10, 10, 1, 40, 15); }
-                tooltips.RemoveAt(2);
-                var Prov = new TooltipLine(Mod, "FoodBuff", Language.GetTextValue("Mods.InformativeTooltips.Special.provides"));
-                Prov.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor;
-                tooltips.Insert(2, Prov);
-                tooltips.Insert(3, new(Mod, "WellFedTooltip", tip));
-                if (Main.expertMode)
-                {
-                    tooltips.Insert(tooltips.Count - 1, new TooltipLine(Mod, "FoodExpert+", Language.GetTextValue("Mods.InformativeTooltips.Buffs.WellFed.Expert")));
-                }
-                if (Main.dontStarveWorld) { tooltips.Insert(tooltips.Count - 1, new TooltipLine(Mod, "FoodHunger", Language.GetTextValue("Mods.InformativeTooltips.Buffs.WellFed.Hunger"))); }
-                tooltips.RemoveAt(tooltips.Count - 3);
-                tooltips.RemoveAt(tooltips.Count - 4);
-                tooltips.RemoveAt(tooltips.Count - 1);
-                tooltips.RemoveAt(tooltips.Count - 2);
-                tooltips.RemoveAt(1);
-                tooltips.RemoveAt(0);
+                if (item.buffType == BuffID.WellFed) { tip = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.WellFed.Tooltip"), 2, 2, 5, 5, 0.5, 20, 5); }
+                if (item.buffType == BuffID.WellFed2) { tip = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.WellFed.Tooltip"), 3, 3, 7.5, 7.5, 0.75, 30, 10); }
+                if (item.buffType == BuffID.WellFed3) { tip = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.WellFed.Tooltip"), 4, 4, 10, 10, 1, 40, 15); }
+                var Prov = new TooltipLine(Mod, "Tooltip0", Language.GetTextValue("Mods.InformativeTooltips.Special.provides"));
+                var ExpNew = new TooltipLine(Mod, "Tooltip2", Language.GetTextValue("Mods.InformativeTooltips.Buffs.WellFed.Expert"));
+                var Hunger = new TooltipLine(Mod, "Tooltip3", Language.GetTextValue("Mods.InformativeTooltips.Buffs.WellFed.Hunger"));
+                ExpNew.OverrideColor = pos;
+                Hunger.OverrideColor = pos;
+                Prov.OverrideColor = pos;
+                tooltips.Add(Prov);
+                tooltips.Add(new(Mod, "Tooltip1", tip));
+                if (Main.expertMode) { tooltips.Add(ExpNew); }
+                if (Main.dontStarveWorld) { tooltips.Add(Hunger); }
             }
         }
     }

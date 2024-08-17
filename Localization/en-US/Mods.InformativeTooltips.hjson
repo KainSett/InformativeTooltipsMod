@@ -53,6 +53,8 @@ Special: {
 	grantsbuff: Grants a buff
 	clickbuff: and interacted with
 	nearby: when placed nearby
+	all: all
+	various: various
 }
 
 Items: {
