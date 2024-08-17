@@ -13,8 +13,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace InformativeTooltips.Content
 {
-    public class TooltipComparisonArmor : GlobalItem
+    public class TooltipComparisonArmor : GlobalTooltipsBase
     {
+        public TooltipComparisonArmor() : base(3) { }
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item item, bool lateInstantiation)
         {
@@ -170,49 +171,52 @@ namespace InformativeTooltips.Content
             for (int i = 0; i < tooltips.Count; i++)
             {
                 var tooltipLine = tooltips[i];
-                if (tooltipLine.Text.Contains('&'))
+                if (tooltipLine.Name != "SetBonus")
                 {
-                    int ind = tooltipLine.Text.IndexOf('&');
-                    tooltipLine.Text.Replace('&', ' ');
-                    tooltipLine.Text.Insert(ind, and);
-                }
-                if (tooltipLine.Text.Contains(and))
-                {
-                    // getting rid of the (something)
-                    if (tooltipLine.Text.Contains('('))
+                    if (tooltipLine.Text.Contains('&'))
                     {
-                        int index = tooltipLine.Text.IndexOf('(');
-                        if (index >= 0)
-                        {
-                            tooltipLine.Text = tooltipLine.Text.Substring(0, index).TrimEnd();
-                        }
+                        int ind = tooltipLine.Text.IndexOf('&');
+                        tooltipLine.Text.Replace('&', ' ');
+                        tooltipLine.Text.Insert(ind, and);
                     }
-
-                    // operating on the original line
-                    string OriginalLine = tooltipLine.Text;
-                    tooltips.RemoveAt(i);
-                    string[] parts = OriginalLine.Split(new string[] {and}, StringSplitOptions.None);
-
-                    string FirstLine = parts[0].Trim();
-                    string SecondLine = parts[1].Trim();
-
-                    // calling for line changes
-                    Count = tooltips.Count;
-                    LineName = "First";
-                    SeparatedLinesOperating(item, tooltips, FirstLine, false, false);
-                    LineName = "Second";
-                    SeparatedLinesOperating(item, tooltips, SecondLine, false, false);
-                    if (Count + 2 > tooltips.Count)
+                    if (tooltipLine.Text.Contains(and))
                     {
+                        // getting rid of the (something)
+                        if (tooltipLine.Text.Contains('('))
+                        {
+                            int index = tooltipLine.Text.IndexOf('(');
+                            if (index >= 0)
+                            {
+                                tooltipLine.Text = tooltipLine.Text.Substring(0, index).TrimEnd();
+                            }
+                        }
+
+                        // operating on the original line
+                        string OriginalLine = tooltipLine.Text;
+                        tooltips.RemoveAt(i);
+                        string[] parts = OriginalLine.Split(new string[] { and }, StringSplitOptions.None);
+
+                        string FirstLine = parts[0].Trim();
+                        string SecondLine = parts[1].Trim();
+
+                        // calling for line changes
+                        Count = tooltips.Count;
                         LineName = "First";
                         SeparatedLinesOperating(item, tooltips, FirstLine, false, false);
-                    }
+                        LineName = "Second";
+                        SeparatedLinesOperating(item, tooltips, SecondLine, false, false);
+                        if (Count + 2 > tooltips.Count)
+                        {
+                            LineName = "First";
+                            SeparatedLinesOperating(item, tooltips, FirstLine, false, false);
+                        }
 
-                    // resetting stats for the next item
-                    prevWordInc = "";
-                    prevWordStat = "";
-                    prevWordClass = "";
-                    prevWordNumber = "";
+                        // resetting stats for the next item
+                        prevWordInc = "";
+                        prevWordStat = "";
+                        prevWordClass = "";
+                        prevWordNumber = "";
+                    }
                 }
             }
         }
@@ -388,83 +392,86 @@ namespace InformativeTooltips.Content
                     tooltips.Insert(yea + 1, ArmorComp);
                     foreach (var tooltipLine in tooltips)
                     {
-                        SeparatedLinesOperating(item, tooltips, tooltipLine.Text, true, false);
-
-                        double Diff = 0;
-                        bool ISAdded = false;
-                        if (!IsEquippedNull)
+                        if (tooltipLine.Name != "SetBonus")
                         {
-                            foreach (var equippedTooltip in equippedTooltips)
-                            {
-                                SeparatedLinesOperating(equipped, equippedTooltips, equippedTooltip.Text, true, true);
-                                if (CStat == Stat && CClass == Class)
-                                {
-                                    ISChar = false;
-                                    ISRegen = false;
-                                    int CharInDex = CNumber.IndexOf('%');
-                                    int CharIndex = Number.IndexOf('%');
-                                    int hpInDex = CNumber.IndexOf($" {hps.First()}");
-                                    int hpIndex = Number.IndexOf($" {hps.First()}");
+                            SeparatedLinesOperating(item, tooltips, tooltipLine.Text, true, false);
 
-                                    if (CharInDex != -1 && CharIndex != -1)
-                                    {
-                                        ISChar = true;
-                                        if (double.TryParse(CNumber.Remove(CharInDex), out double CNum) && double.TryParse(Number.Remove(CharIndex), out double Num))
-                                        {
-                                            Diff = Num - CNum;
-                                        }
-                                    }
-                                    else if (hpInDex != -1 && hpIndex != -1)
-                                    {
-                                        ISRegen = true;
-                                        if (double.TryParse(CNumber.Remove(hpInDex), out double CNum) && double.TryParse(Number.Remove(hpIndex), out double Num))
-                                        {
-                                            Diff = Num - CNum;
-                                        }
-                                    }
-                                    else if (double.TryParse(CNumber, out double CNum) && double.TryParse(Number, out double Num))
-                                    {
-                                        Diff = Num - CNum;
-                                    }
-                                    AddStatTooltipComparison(tooltips, Diff, $"{Class} {Stat}");
-                                    ISAdded = true;
-                                    break;
-                                }
-                            }
-                            if (!ISAdded)
+                            double Diff = 0;
+                            bool ISAdded = false;
+                            if (!IsEquippedNull)
                             {
-                                if (tooltipLine.Text.Contains(Aggro))
+                                foreach (var equippedTooltip in equippedTooltips)
                                 {
-                                    storedAggro = tooltipLine.Text;
-                                    tooltips.Remove(tooltipLine);
+                                    SeparatedLinesOperating(equipped, equippedTooltips, equippedTooltip.Text, true, true);
+                                    if (CStat == Stat && CClass == Class)
+                                    {
+                                        ISChar = false;
+                                        ISRegen = false;
+                                        int CharInDex = CNumber.IndexOf('%');
+                                        int CharIndex = Number.IndexOf('%');
+                                        int hpInDex = CNumber.IndexOf($" {hps.First()}");
+                                        int hpIndex = Number.IndexOf($" {hps.First()}");
+
+                                        if (CharInDex != -1 && CharIndex != -1)
+                                        {
+                                            ISChar = true;
+                                            if (double.TryParse(CNumber.Remove(CharInDex), out double CNum) && double.TryParse(Number.Remove(CharIndex), out double Num))
+                                            {
+                                                Diff = Num - CNum;
+                                            }
+                                        }
+                                        else if (hpInDex != -1 && hpIndex != -1)
+                                        {
+                                            ISRegen = true;
+                                            if (double.TryParse(CNumber.Remove(hpInDex), out double CNum) && double.TryParse(Number.Remove(hpIndex), out double Num))
+                                            {
+                                                Diff = Num - CNum;
+                                            }
+                                        }
+                                        else if (double.TryParse(CNumber, out double CNum) && double.TryParse(Number, out double Num))
+                                        {
+                                            Diff = Num - CNum;
+                                        }
+                                        AddStatTooltipComparison(tooltips, Diff, $"{Class} {Stat}");
+                                        ISAdded = true;
+                                        break;
+                                    }
                                 }
-                                else
+                                if (!ISAdded)
                                 {
-                                    ISChar = false;
-                                    ISRegen = false;
-                                    int CharIndex = Number.IndexOf('%');
-                                    int hpIndex = Number.IndexOf($" {hps}");
-                                    if (CharIndex != -1)
+                                    if (tooltipLine.Text.Contains(Aggro))
                                     {
-                                        ISChar = true;
-                                        if (int.TryParse(Number.Remove(CharIndex), out int Num))
+                                        storedAggro = tooltipLine.Text;
+                                        tooltips.Remove(tooltipLine);
+                                    }
+                                    else
+                                    {
+                                        ISChar = false;
+                                        ISRegen = false;
+                                        int CharIndex = Number.IndexOf('%');
+                                        int hpIndex = Number.IndexOf($" {hps}");
+                                        if (CharIndex != -1)
+                                        {
+                                            ISChar = true;
+                                            if (int.TryParse(Number.Remove(CharIndex), out int Num))
+                                            {
+                                                Diff = Num;
+                                            }
+                                        }
+                                        else if (hpIndex != -1)
+                                        {
+                                            ISRegen = true;
+                                            if (int.TryParse(Number.Remove(hpIndex), out int Num))
+                                            {
+                                                Diff = Num;
+                                            }
+                                        }
+                                        else if (int.TryParse(Number, out int Num))
                                         {
                                             Diff = Num;
                                         }
+                                        AddStatTooltipComparison(tooltips, Diff, $"{Class} {Stat}");
                                     }
-                                    else if (hpIndex != -1)
-                                    {
-                                        ISRegen = true;
-                                        if (int.TryParse(Number.Remove(hpIndex), out int Num))
-                                        {
-                                            Diff = Num;
-                                        }
-                                    }
-                                    else if (int.TryParse(Number, out int Num))
-                                    {
-                                        Diff = Num;
-                                    }
-                                    AddStatTooltipComparison(tooltips, Diff, $"{Class} {Stat}");
                                 }
                             }
                         }
