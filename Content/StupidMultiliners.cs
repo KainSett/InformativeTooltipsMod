@@ -1,4 +1,4 @@
-using InformativeTooltips.GlobalTooltips;
+using InformativeTooltips.Content.GlobalTooltips;
 using System.Collections.Generic;
 using Terraria.ID;
 using Terraria.Localization;

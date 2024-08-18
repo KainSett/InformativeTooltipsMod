@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
 using System.Collections.Generic;
-using InformativeTooltips.GlobalTooltips;
+using InformativeTooltips.Content.GlobalTooltips;
 using Terraria.Localization;
 using System.Linq;
 using Microsoft.Xna.Framework.Input;

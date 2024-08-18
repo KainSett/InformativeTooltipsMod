@@ -1,6 +1,6 @@
 using Terraria.ModLoader;
 
-namespace InformativeTooltips.GlobalTooltips
+namespace InformativeTooltips.Content.GlobalTooltips
 {
     public class GlobalTooltipsBase : GlobalItem
     {
