@@ -68,11 +68,11 @@ Items: {
 
 	Price: {
 		shop: Shop value multiplier:
-		Value: Default sell value:
-		plat: " {0} platinum"
-		gold: " {0} gold"
-		silv: " {0} silver"
-		copp: " {0} copper"
+		Value: "Default sell value: "
+		plat: "[i/s{0}:74]"
+		gold: "[i/s{0}:73]"
+		silv: "[i/s{0}:72]"
+		copp: "[i/s{0}:71]"
 	}
 }
 

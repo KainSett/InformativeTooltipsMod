@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Terraria;
+using Terraria.Graphics.Effects;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
@@ -57,6 +58,8 @@ namespace InformativeTooltips.Content.SmallDetails
                         var multLine = new TooltipLine(Mod, "PriceMultiplier", Language.GetTextValue("Mods.InformativeTooltips.Items.Price.shop") + $" {formattedResult}");
                         multLine.OverrideColor = multiplier < 1 ? ModContent.GetInstance<ArmorDetailedConfig>().NegativeColor : multLine.OverrideColor;
                         multLine.OverrideColor = multiplier > 1 ? ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor : multLine.OverrideColor;
+                        var coins = tooltips[index].Text;
+                        tooltips[index].Text = ShopValueTooltipUpgrade(tooltips[index].Text);
                         tooltips.Insert(index, multLine);
                         tooltips.Insert(index, Price);
                     }
@@ -90,6 +93,62 @@ namespace InformativeTooltips.Content.SmallDetails
                     }
                 }
             }
+        }
+        public string ShopValueTooltipUpgrade(string text)
+        {
+            // Split the string by commas
+            int count = text.Length - 1;
+            for (int x = 0; x < count; x++)
+            {
+                char remove = text[x];
+                char postremove = text[x + 1];
+                if (remove == ' ' && char.IsLetter(postremove))
+                {
+                    text = $"{text.Remove(x)}{text[(x + 1)..]}";
+                    --count;
+                }
+            }
+            // Trim and process the input string
+            var start = text.Remove(text.IndexOf(':') + 1);
+            string[] parts = text.Substring(text.IndexOf(':') + 1).Trim().Split(' ');
+            // Currency type mapping
+            var currencyTypeMap = new Dictionary<string, int>
+            {
+                { "platinum", 74 },
+                { "gold", 73 },
+                { "silver", 72 },
+                { "copper", 71 }
+            };
+
+            // StringBuilder for the output
+            var result = new System.Text.StringBuilder();
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                string part = parts[i];
+                var notext = "";
+                foreach (var l in part)
+                {
+                    if (char.IsDigit(l))
+                    {
+                        notext += l;
+                    }
+                }
+                var value = int.Parse(notext);
+
+                foreach (var coin in currencyTypeMap)
+                {
+                    if (part.Contains($"{coin.Key}"))
+                    {
+                        var type = coin.Value;
+                        result.Append($"[i/s{value}:{type}]");
+                    }
+                }
+
+            }
+
+            // Return the result as a string, prefixed with "value: "
+            return $"{start} {result.ToString().Trim()}";
         }
         public int ShopValueTooltipExtraction(string text)
         {
