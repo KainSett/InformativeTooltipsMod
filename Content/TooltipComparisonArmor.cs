@@ -9,7 +9,6 @@ using Terraria.Localization;
 using System.Linq;
 using Microsoft.Xna.Framework.Input;
 using InformativeTooltips.Common.Configs;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace InformativeTooltips.Content
 {

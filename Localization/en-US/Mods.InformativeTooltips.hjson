@@ -65,6 +65,15 @@ Items: {
 	PlacedNearby.Tooltip: Provides following effects when placed nearby:
 	AegisVanilla: by 4
 	ArmorCompare: In comparison to equipped:
+
+	Price: {
+		shop: Shop value multiplier:
+		Value: Default sell value:
+		plat: " {0} platinum"
+		gold: " {0} gold"
+		silv: " {0} silver"
+		copp: " {0} copper"
+	}
 }
 
 Buffs: {
@@ -142,6 +151,11 @@ Buffs: {
 }
 
 Individual: {
+	ChloroBullet: {
+		text: Skill Issue
+		name: Bullet
+	}
+
 	BoC: {
 		basetooltip1: Grants a chance to create illusions and dodge an attack
 		basetooltip2: Grants a chance to confuse nearby enemies after being struck
@@ -224,6 +238,16 @@ Configs: {
 		NeutralColor: {
 			Label: Neutral Color
 			Tooltip: The color of the lines that are less important, to shift the focus to other, more importaant lines
+		}
+
+		SetBonusInInv: {
+			Label: Set Bonus In Inv
+			Tooltip: ""
+		}
+
+		SmallDetailsToggle: {
+			Label: Small Details Toggle
+			Tooltip: ""
 		}
 	}
 }

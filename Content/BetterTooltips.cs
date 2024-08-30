@@ -9,7 +9,6 @@ using System;
 using Terraria.GameInput;
 using System.Linq;
 using InformativeTooltips.Common.Configs;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace InformativeTooltips.Content.BetterTooltips
 {
     public class Food : GlobalItem
@@ -32,12 +31,13 @@ namespace InformativeTooltips.Content.BetterTooltips
             if (exp != -1) { tooltips.RemoveAt(exp); }
             int d = tooltips.FindIndex(line => line.Name == "Tooltip2");
             if (d == -1) { d = tooltips.FindIndex(line => line.Name == "Tooltip1"); }
-            if (d != -1) 
-            { 
+            if (d != -1)
+            {
                 var desc = tooltips[d];
                 tooltips.RemoveAt(d);
                 desc.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().NeutralColor;
-                tooltips.Add(desc);
+                var ind = 1 + tooltips.FindIndex(line => line.Name == "BuffTime");
+                tooltips.Insert(ind, desc);
             }
             int s = tooltips.FindIndex(line => line.Name == "Tooltip2") != -1 ? tooltips.FindIndex(line => line.Name == "Tooltip1") : tooltips.FindIndex(line => line.Name == "Tooltip0");
             tooltips[s].Text = tooltips[s].Text.Replace(Language.GetTextValue("Mods.InformativeTooltips.Special.all"), Language.GetTextValue("Mods.InformativeTooltips.Special.various"));
@@ -87,7 +87,7 @@ namespace InformativeTooltips.Content.BetterTooltips
             }
         }
     }
-    
+
     public class CampFireBuff : GlobalBuff
     {
         public override void ModifyBuffText(int type, ref string buffName, ref string tip, ref int rare)
@@ -442,20 +442,34 @@ namespace InformativeTooltips.Content.BetterTooltips
             }
         }
     }
-    public class CShellTooltipPlayer : ModPlayer
+    public class ScrollTooltipPlayer : GlobalItem
     {
-        public int Current = Math.Clamp(1, 1, 3);
-        public bool PrevState = false;
-        public int scrolled = Math.Clamp(0, -5, 5);
-        public override void ResetEffects()
+        public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
-            if (!Main.keyState.IsKeyDown(Keys.LeftShift) && !Main.keyState.IsKeyDown(Keys.RightShift))
+            if (ModContent.GetInstance<ArmorDetailedConfig>().AccessoryStatsToggle)
             {
-                Current = 1;
-                PrevState = false;
-                scrolled = 0;
+                if (!Main.keyState.IsKeyDown(Keys.LeftShift) && !Main.keyState.IsKeyDown(Keys.RightShift))
+                {
+                    ScrollTooltip.Current = 1;
+                    ScrollTooltip.scrolled = 0;
+                }
+                else
+                {
+                    if (PlayerInput.ScrollWheelDelta > 0) { ScrollTooltip.scrolled++; }
+                    else if (PlayerInput.ScrollWheelDelta < 0) { ScrollTooltip.scrolled--; }
+
+                    if (ScrollTooltip.scrolled <= -5) { ScrollTooltip.scrolled = 0; ScrollTooltip.Current = ScrollTooltip.Current != ScrollTooltip.max ? ++ScrollTooltip.Current : 1; }
+                    else if (ScrollTooltip.scrolled >= 5) { ScrollTooltip.scrolled = 0; ScrollTooltip.Current = ScrollTooltip.Current != 1 ? --ScrollTooltip.Current : ScrollTooltip.max; }
+                }
             }
         }
+    }
+    public static class ScrollTooltip
+    {
+        public static int max = 2;
+        public static int Current = Math.Clamp(1, 1, max);
+        public static int scrolled = Math.Clamp(0, 0, 5);
+        public static bool PrevState = false;
     }
     public class CShell : GlobalItem
     {
@@ -507,35 +521,11 @@ namespace InformativeTooltips.Content.BetterTooltips
                     else
                     {
                         tooltips.Clear();
-                        if (PlayerInput.ScrollWheelDelta > 0) { Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().scrolled++; }
-                        else if (PlayerInput.ScrollWheelDelta < 0) { Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().scrolled--; }
+                        int y;
+                        if (item.type == ItemID.MoonShell) { ScrollTooltip.max = 2; y = 1; }
+                        else { ScrollTooltip.max = 3; y = 0; }
 
-
-                        int y = 1;
-                        if (item.type == ItemID.MoonShell) 
-                        { 
-                            y = 2; 
-                            if (Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().Current == 1) { Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().Current = 2; }
-                        }
-                        if (Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().scrolled >= 5 && !Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().PrevState)
-                        {
-                            Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().scrolled = 0;
-                            if (Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().Current != y) { Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().Current -= 1; }
-                            else { Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().Current = 3; }
-                            Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().PrevState = true;
-                        }
-                        else if (Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().scrolled <= -5 && !Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().PrevState)
-                        {
-                            Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().scrolled = 0;
-                            if (Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().Current != 3) { Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().Current += 1; }
-                            else { Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().Current = y; }
-                            Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().PrevState = true;
-                        }
-                        if (PlayerInput.ScrollWheelDelta == 0)
-                        {
-                            Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().PrevState = false;
-                        }
-                        int CurrentLine = Main.LocalPlayer.GetModPlayer<CShellTooltipPlayer>().Current;
+                        int CurrentLine = ScrollTooltip.Current + y;
                         var moveinf = new TooltipLine(Mod, "MoveWithArrows", moveinfo);
                         moveinf.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().HeaderColor;
                         tooltips.Add(moveinf);
@@ -636,7 +626,37 @@ namespace InformativeTooltips.Content.BetterTooltips
                         tooltips.RemoveAt(++index);
                         tooltips.RemoveAt(--index);
                     }
-                } 
+                }
+            }
+        }
+    }
+    public class SillyGoofyHomingBulletTooltip : GlobalItem
+    {
+        public override bool AppliesToEntity(Item entity, bool lateInstantiation)
+        {
+            return entity.type == ItemID.ChlorophyteBullet;
+        }
+        public override bool InstancePerEntity => true;
+        public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
+        {
+            int index = tooltips.FindIndex(line => line.Name == "ItemName");
+            if (index != -2)
+            {
+                tooltips[index].Text = Language.GetTextValue("Mods.InformativeTooltips.Individual.ChloroBullet.text") + " " + Language.GetTextValue("Mods.InformativeTooltips.Individual.ChloroBullet.name");
+            }
+        }
+        public int SkillIssueTimer = 69;
+        public override void OnConsumedAsAmmo(Item ammo, Item weapon, Player player)
+        {
+            if (ammo.type == ItemID.ChlorophyteBullet) { --SkillIssueTimer; }
+            if (SkillIssueTimer <= 0) 
+            { 
+                SkillIssueTimer = 69;
+                var SkillIssue = new AdvancedPopupRequest();
+                SkillIssue.DurationInFrames = 200;
+                SkillIssue.Text = Language.GetTextValue("Mods.InformativeTooltips.Individual.ChloroBullet.text");
+                SkillIssue.Color = ModContent.GetInstance<ArmorDetailedConfig>().NeutralColor;
+                PopupText.NewText(SkillIssue, player.position + new Vector2(-20, -20));
             }
         }
     }
