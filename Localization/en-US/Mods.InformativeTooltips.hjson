@@ -69,10 +69,20 @@ Items: {
 	Price: {
 		shop: Shop value multiplier:
 		Value: "Default sell value: "
-		plat: "[i/s{0}:74]"
-		gold: "[i/s{0}:73]"
-		silv: "[i/s{0}:72]"
-		copp: "[i/s{0}:71]"
+
+		Coins: {
+			plat: "[i/s{0}:74]"
+			gold: "[i/s{0}:73]"
+			silv: "[i/s{0}:72]"
+			copp: "[i/s{0}:71]"
+		}
+
+		Vanilla: {
+			plat: platinum
+			gold: gold
+			silv: silver
+			copp: copper
+		}
 	}
 }
 
@@ -241,12 +251,27 @@ Configs: {
 		}
 
 		SetBonusInInv: {
-			Label: Set Bonus In Inv
+			Label: Set Bonus In Invertory
 			Tooltip: ""
 		}
 
-		SmallDetailsToggle: {
-			Label: Small Details Toggle
+		DefaultValueToggle: {
+			Label: Default Item Value
+			Tooltip: Display the default value of an item
+		}
+
+		ShopValueComparisonToggle: {
+			Label: Shop Value Comparison Toggle
+			Tooltip: Display the item value multiplier when in a shop
+		}
+
+		CoinTooltipToggle: {
+			Label: Coin Tooltip Toggle
+			Tooltip: Show item value in coins instead of text
+		}
+
+		DefaultColor: {
+			Label: Default Color
 			Tooltip: ""
 		}
 	}

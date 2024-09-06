@@ -1,19 +1,51 @@
 using InformativeTooltips.Common.Configs;
+using InformativeTooltips.Content.GlobalTooltips;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Terraria;
-using Terraria.Graphics.Effects;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace InformativeTooltips.Content.SmallDetails
 {
-    public class LilAdditions : GlobalItem
+    public class AntiReadingMeasures : GlobalTooltipsBase
+    {
+        public AntiReadingMeasures() : base(4) { }
+    }
+    public class DefaultTooltipColor : AntiReadingMeasures
+    {
+        public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
+        {
+            return;
+            foreach (var line in tooltips)
+            {
+                if (line.OverrideColor == null)
+                {
+                    line.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().DefaultColor;
+                }
+                else if (line.Text.Contains("[c"))
+                {
+                    string[] parts = line.Text[(line.Text.IndexOf(']') + 1)..].Trim().Split(' ');
+                    if (parts.Length > 0)
+                    {
+                        string color = ColorToHex(ModContent.GetInstance<ArmorDetailedConfig>().DefaultColor);
+                        parts[^1] = $"[c/{color}:{parts[^1]}]";
+                        line.Text = "";
+                        line.Text += parts;
+                    }
+                }
+            }
+        }
+        static string ColorToHex(Color color)
+        {
+            return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
+        }
+    }
+    public class ItemValueAdditions : GlobalItem
     {
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)
         {
@@ -22,7 +54,6 @@ namespace InformativeTooltips.Content.SmallDetails
         public override bool InstancePerEntity => true;
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
-            if (!ModContent.GetInstance<ArmorDetailedConfig>().SmallDetailsToggle) { return; }
             if (!Main.keyState.IsKeyDown(Keys.LeftShift) && !Main.keyState.IsKeyDown(Keys.RightShift))
             {
                 int value = item.value / 5;
@@ -35,17 +66,17 @@ namespace InformativeTooltips.Content.SmallDetails
                 while (value >= 100 && value < 10000) { ++silv; value -= 100; }
                 while (value >= 1 && value < 100) { ++copp; value -= 1; }
                 string price = Language.GetTextValue("Mods.InformativeTooltips.Items.Price.Value");
-                price = plat != 0 ? price + string.Format(Language.GetTextValue("Mods.InformativeTooltips.Items.Price.plat"), plat) : price;
-                price = gold != 0 ? price + string.Format(Language.GetTextValue("Mods.InformativeTooltips.Items.Price.gold"), gold) : price;
-                price = silv != 0 ? price + string.Format(Language.GetTextValue("Mods.InformativeTooltips.Items.Price.silv"), silv) : price;
-                price = copp != 0 ? price + string.Format(Language.GetTextValue("Mods.InformativeTooltips.Items.Price.copp"), copp) : price;
+                var cum = ModContent.GetInstance<ArmorDetailedConfig>().CoinTooltipToggle ? "Coins" : "Vanilla";
+                price = plat != 0 ? price + string.Format(Language.GetTextValue($"Mods.InformativeTooltips.Items.Price.{cum}.plat"), plat) : price;
+                price = gold != 0 ? price + string.Format(Language.GetTextValue($"Mods.InformativeTooltips.Items.Price.{cum}.gold"), gold) : price;
+                price = silv != 0 ? price + string.Format(Language.GetTextValue($"Mods.InformativeTooltips.Items.Price.{cum}.silv"), silv) : price;
+                price = copp != 0 ? price + string.Format(Language.GetTextValue($"Mods.InformativeTooltips.Items.Price.{cum}.copp"), copp) : price;
                 if (plat == 0 && gold == 0 && silv == 0 && copp == 0)
                 {
                     price += " 0";
                 }
                 int index = tooltips.FindIndex(line => line.Name == "Price");
-                var Price = new TooltipLine(Mod, "DefaultPrice", price);
-                Price.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().NeutralColor;
+                var Price = new TooltipLine(Mod, "DefaultPrice", price) { OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().NeutralColor };
                 if (index != -1)
                 {
                     if (item.value != 0)
@@ -59,21 +90,34 @@ namespace InformativeTooltips.Content.SmallDetails
                         multLine.OverrideColor = multiplier < 1 ? ModContent.GetInstance<ArmorDetailedConfig>().NegativeColor : multLine.OverrideColor;
                         multLine.OverrideColor = multiplier > 1 ? ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor : multLine.OverrideColor;
                         var coins = tooltips[index].Text;
-                        tooltips[index].Text = ShopValueTooltipUpgrade(tooltips[index].Text);
-                        tooltips.Insert(index, multLine);
-                        tooltips.Insert(index, Price);
+                        if (ModContent.GetInstance<ArmorDetailedConfig>().CoinTooltipToggle)
+                        {
+                            tooltips[index].Text = ShopValueTooltipUpgrade(tooltips[index].Text);
+                        }
+
+                        if (ModContent.GetInstance<ArmorDetailedConfig>().ShopValueComparisonToggle) 
+                        { 
+                            tooltips.Insert(index, multLine); 
+                        }
+
+                        if (ModContent.GetInstance<ArmorDetailedConfig>().DefaultValueToggle)
+                        {
+                            tooltips.Insert(index, Price);
+                        }
                     }
                 }
                 else
                 {
-                    string[] search = new string[7];
-                    search[0] = "Prefix";
-                    search[1] = "Expert";
-                    search[2] = "Master";
-                    search[3] = "Journey";
-                    search[4] = "Bestiary";
-                    search[5] = "Etherian";
-                    search[6] = "OneDropLogo";
+                    string[] search =
+                    [
+                        "Prefix",
+                        "Expert",
+                        "Master",
+                        "Journey",
+                        "Bestiary",
+                        "Etherian",
+                        "OneDropLogo",
+                    ];
                     int i = tooltips.Count;
                     foreach (var text in search)
                     {
@@ -83,18 +127,21 @@ namespace InformativeTooltips.Content.SmallDetails
                             i = y;
                         }
                     }
-                    if (i == tooltips.Count)
+                    if (ModContent.GetInstance<ArmorDetailedConfig>().DefaultValueToggle)
                     {
-                        tooltips.Add(Price);
-                    }
-                    else 
-                    { 
-                        tooltips.Insert(i, Price); 
+                        if (i == tooltips.Count)
+                        {
+                            tooltips.Add(Price);
+                        }
+                        else
+                        {
+                            tooltips.Insert(i, Price);
+                        }
                     }
                 }
             }
         }
-        public string ShopValueTooltipUpgrade(string text)
+        public static string ShopValueTooltipUpgrade(string text)
         {
             // Split the string by commas
             int count = text.Length - 1;
@@ -110,7 +157,7 @@ namespace InformativeTooltips.Content.SmallDetails
             }
             // Trim and process the input string
             var start = text.Remove(text.IndexOf(':') + 1);
-            string[] parts = text.Substring(text.IndexOf(':') + 1).Trim().Split(' ');
+            string[] parts = text[(text.IndexOf(':') + 1)..].Trim().Split(' ');
             // Currency type mapping
             var currencyTypeMap = new Dictionary<string, int>
             {
@@ -121,7 +168,7 @@ namespace InformativeTooltips.Content.SmallDetails
             };
 
             // StringBuilder for the output
-            var result = new System.Text.StringBuilder();
+            var result = string.Empty;
 
             for (int i = 0; i < parts.Length; i++)
             {
@@ -141,16 +188,16 @@ namespace InformativeTooltips.Content.SmallDetails
                     if (part.Contains($"{coin.Key}"))
                     {
                         var type = coin.Value;
-                        result.Append($"[i/s{value}:{type}]");
+                        result += $"[i/s{value}:{type}]";
                     }
                 }
 
             }
 
             // Return the result as a string, prefixed with "value: "
-            return $"{start} {result.ToString().Trim()}";
+            return $"{start} {result}";
         }
-        public int ShopValueTooltipExtraction(string text)
+        public static int ShopValueTooltipExtraction(string text)
         {
             int platinum = 0, gold = 0, silver = 0, copper = 0;
 
@@ -166,7 +213,7 @@ namespace InformativeTooltips.Content.SmallDetails
                     --count;
                 }
             }
-            string[] parts = text.Substring(text.IndexOf(':') + 1).Trim().Split(' ');
+            string[] parts = text[(text.IndexOf(':') + 1)..].Trim().Split(' ');
 
             foreach (string part in parts)
             {
