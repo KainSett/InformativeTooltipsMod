@@ -9,6 +9,7 @@ using Terraria.Localization;
 using System.Linq;
 using Microsoft.Xna.Framework.Input;
 using InformativeTooltips.Common.Configs;
+using InformativeTooltips.Content.BetterTooltips;
 
 namespace InformativeTooltips.Content
 {
@@ -46,7 +47,7 @@ namespace InformativeTooltips.Content
                 }
             }
         }
-        private void AddDefenseComparisonTooltip(List<TooltipLine> tooltips, int defenseDifference)
+        private static void AddDefenseComparisonTooltip(List<TooltipLine> tooltips, int defenseDifference)
         {
             if (ModContent.GetInstance<ArmorDetailedConfig>().ArmorCompare == true)
             {
@@ -160,10 +161,13 @@ namespace InformativeTooltips.Content
             LineSeparation(item, tooltips);
             LineSeparation(item, tooltips);
             // call for Tooltip Reading
-            if (ModContent.GetInstance<ArmorDetailedConfig>().ArmorCompare == true) { TooltipReading(item, tooltips); }
+            if (ScrollTooltip.Current == 1)
+            {
+                if (ModContent.GetInstance<ArmorDetailedConfig>().ArmorCompare == true) { TooltipReading(item, tooltips); }
 
-            var AggroLine = new TooltipLine(Mod, "Aggro Line", storedAggro);
-            if (storedAggro != "") { tooltips.Add(AggroLine); }
+                var AggroLine = new TooltipLine(Mod, "AggroTooltip", storedAggro);
+                if (storedAggro != "") { tooltips.Add(AggroLine); }
+            }
         }
         public void LineSeparation(Item item, List<TooltipLine> tooltips)
         {
@@ -288,7 +292,22 @@ namespace InformativeTooltips.Content
 
                 if (WordNumber != "" && WordInc != "" && WordClass != "" && WordStat != "")
                 {
-                    tooltips.Add(new TooltipLine(Mod, Name, Line));
+                    var q = tooltips.FindLast(line => line.Name.Contains("Tooltip")).Name;
+                    foreach(char c in q)
+                    {
+                        if (!char.IsDigit(c))
+                        {
+                            q = q.Replace(c, ' ').Trim();
+                        }
+                    }
+                    if (int.TryParse(q, out int Q))
+                    {
+                        tooltips.Add(new TooltipLine(Mod, $"Tooltip{Q}", Line));
+                    }
+                    else
+                    {
+                        tooltips.Add(new TooltipLine(Mod, "Tooltip0", Line));
+                    }
                 }
 
                 prevWordNumber = WordNumber;
@@ -474,12 +493,12 @@ namespace InformativeTooltips.Content
                                 }
                             }
                         }
-                        if (tooltipLine.Name == "Equipable" || tooltipLine.Name == "Material" || tooltipLine.Name == "FavoriteDesc" || tooltipLine.Name == "Favorite")
+                        if (!tooltipLine.Name.Contains("Tooltip") && tooltipLine.Name != "ItemName" && tooltipLine.Name != "ArmorComparison" && tooltipLine.Name != "Defense" && tooltipLine.Name != "MoveWithArrows" && tooltipLine.Name != "SetBonusHidden")
                         {
                             tooltipLine.Hide();
                         }
                     }
-                    if (!IsEquippedNull)
+                    if (!IsEquippedNull && ScrollTooltip.Current == 1)
                     {
                         if (ModContent.GetInstance<ArmorDetailedConfig>().ArmorDetailsToggle == true) { AddingNonexistent(tooltips, item, equipped); }
                     }
@@ -534,7 +553,16 @@ namespace InformativeTooltips.Content
                     }
                     ToAdd = Regex.Replace(ToAdd, @"\d", "0");
                     ToAdd = Regex.Replace(ToAdd, @"0+", "0");
-                    tooltips.Add(new TooltipLine(Mod, "AddedComparison", ToAdd));
+                    if (ScrollTooltip.max == 1)
+                    {
+                        tooltips.Add(new TooltipLine(Mod, "AddedComparison", ToAdd));
+                    }
+                    else
+                    {
+                        var x = tooltips.FindIndex(line => line.Name.Contains("SetBonus"));
+                        if (x != -1) { tooltips.Insert(x, new TooltipLine(Mod, "AddedComparison", ToAdd)); }
+                    }
+                
                     int Diff = 0;
                     ISChar = false;
                     ISRegen = false;

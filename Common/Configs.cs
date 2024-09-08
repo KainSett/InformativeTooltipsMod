@@ -11,6 +11,7 @@ namespace InformativeTooltips.Common.Configs
         [DefaultValue(false)]
         public bool ArmorCompare;
         public bool ArmorDetailsToggle;
+        public bool SetBonusInfo;
         public bool SetBonusInInv;
         public bool AccessoryStatsToggle;
         public bool BuffDetailsToggle;
@@ -19,8 +20,6 @@ namespace InformativeTooltips.Common.Configs
         [DefaultValue(true)]
         public bool CoinTooltipToggle;
         [Header("Colors")]
-        [DefaultValue(typeof(Color), "200, 200, 200, 255")]
-        public Color DefaultColor;
         [DefaultValue(typeof(Color), "135, 206, 250, 255")]
         public Color HeaderColor;
         [DefaultValue(typeof(Color), "144, 238, 144, 255")]

@@ -12,39 +12,6 @@ using Terraria.ModLoader.Config;
 
 namespace InformativeTooltips.Content.SmallDetails
 {
-    public class AntiReadingMeasures : GlobalTooltipsBase
-    {
-        public AntiReadingMeasures() : base(4) { }
-    }
-    public class DefaultTooltipColor : AntiReadingMeasures
-    {
-        public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
-        {
-            return;
-            foreach (var line in tooltips)
-            {
-                if (line.OverrideColor == null)
-                {
-                    line.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().DefaultColor;
-                }
-                else if (line.Text.Contains("[c"))
-                {
-                    string[] parts = line.Text[(line.Text.IndexOf(']') + 1)..].Trim().Split(' ');
-                    if (parts.Length > 0)
-                    {
-                        string color = ColorToHex(ModContent.GetInstance<ArmorDetailedConfig>().DefaultColor);
-                        parts[^1] = $"[c/{color}:{parts[^1]}]";
-                        line.Text = "";
-                        line.Text += parts;
-                    }
-                }
-            }
-        }
-        static string ColorToHex(Color color)
-        {
-            return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
-        }
-    }
     public class ItemValueAdditions : GlobalItem
     {
         public override bool AppliesToEntity(Item entity, bool lateInstantiation)

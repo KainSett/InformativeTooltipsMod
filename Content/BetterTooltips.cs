@@ -92,7 +92,7 @@ namespace InformativeTooltips.Content.BetterTooltips
     {
         public override void ModifyBuffText(int type, ref string buffName, ref string tip, ref int rare)
         {
-            if (ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true && type == BuffID.Campfire) { tip = Language.GetTextValue("Mods.InformativeTooltips.Buffs.RegenSlight.Tooltip") + "\n" + string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.NatRegenMult.Tooltip"), 1.1); }
+            if (ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true && type == BuffID.Campfire) { tip = Language.GetTextValue("Mods.InformativeTooltips.Buffs.RegenSlight") + "\n" + string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.NatRegenMult"), 1.1); }
         }
     }
     public class GlobalPlaceableBuffs : GlobalItem
@@ -152,7 +152,7 @@ namespace InformativeTooltips.Content.BetterTooltips
             return item.type == ItemID.CatBast;
         }
         public override bool DoApply { get; set; } = true;
-        public override string Line1 { get; set; } = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.DefenseInc.Tooltip"), 5);
+        public override string Line1 { get; set; } = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.DefenseInc"), 5);
     }
     public class GlobalCampfireTooltip : GlobalPlaceableBuffs
     {
@@ -162,8 +162,8 @@ namespace InformativeTooltips.Content.BetterTooltips
             return item.createTile == TileID.Campfire || item.createTile == TileID.Fireplace;
         }
         public override bool DoApply { get; set; } = true;
-        public override string Line1 { get; set; } = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.NatRegenMult.Tooltip"), 1.1);
-        public override string Line2 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Buffs.RegenSlight.Tooltip");
+        public override string Line1 { get; set; } = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.NatRegenMult"), 1.1);
+        public override string Line2 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Buffs.RegenSlight");
     }
     public class GlobalHeartLanternTooltip : GlobalPlaceableBuffs
     {
@@ -173,7 +173,7 @@ namespace InformativeTooltips.Content.BetterTooltips
             return item.type == ItemID.HeartLantern;
         }
         public override bool DoApply { get; set; } = true;
-        public override string Line1 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Buffs.Regen1.Tooltip");
+        public override string Line1 { get; set; } = Language.GetTextValue("Mods.InformativeTooltips.Buffs.Regen1");
     }
     public class GlobalGnomeTooltip : GlobalPlaceableBuffs
     {
@@ -279,7 +279,7 @@ namespace InformativeTooltips.Content.BetterTooltips
         {
             if (ModContent.GetInstance<ArmorDetailedConfig>().BuffDetailsToggle == true && type == BuffID.CatBast)
             {
-                tip = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.DefenseInc.Tooltip"), 5);
+                tip = string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.DefenseInc"), 5);
             }
         }
     }
@@ -343,7 +343,7 @@ namespace InformativeTooltips.Content.BetterTooltips
         }
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {
-            tooltips[2].Text = $"{tooltips[2].Text.Remove(tooltips[2].Text.IndexOf(' '))} {string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.NatRegenRampRate.Tooltip").ToLowerInvariant(), 20)}";
+            tooltips[2].Text = $"{tooltips[2].Text.Remove(tooltips[2].Text.IndexOf(' '))} {string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.NatRegenRate").ToLowerInvariant(), 20)}";
         }
     }
     public class AnkhS : GlobalItem
@@ -407,7 +407,7 @@ namespace InformativeTooltips.Content.BetterTooltips
                 Provides.OverrideColor = ModContent.GetInstance<ArmorDetailedConfig>().PositiveColor;
                 tooltips.Add(Provides);
                 tooltips.Add(new(Mod, "MoonCharm", string.Format(Language.GetTextValue("Mods.InformativeTooltips.Buffs.Werewolf.Tooltip"), 3, 2, 5.1, 5.1, 5)));
-                tooltips.Add(new(Mod, "RegenSlight", Language.GetTextValue("Mods.InformativeTooltips.Buffs.RegenSlight.Tooltip")));
+                tooltips.Add(new(Mod, "RegenSlight", Language.GetTextValue("Mods.InformativeTooltips.Buffs.RegenSlight")));
             }
         }
     }
@@ -462,14 +462,14 @@ namespace InformativeTooltips.Content.BetterTooltips
                     else if (ScrollTooltip.scrolled >= 5) { ScrollTooltip.scrolled = 0; ScrollTooltip.Current = ScrollTooltip.Current != 1 ? --ScrollTooltip.Current : ScrollTooltip.max; }
                 }
             }
+            ScrollTooltip.max = 1;
         }
     }
     public static class ScrollTooltip
     {
-        public static int max = 2;
+        public static int max = 1;
         public static int Current = Math.Clamp(1, 1, max);
         public static int scrolled = Math.Clamp(0, 0, 5);
-        public static bool PrevState = false;
     }
     public class CShell : GlobalItem
     {
@@ -483,8 +483,8 @@ namespace InformativeTooltips.Content.BetterTooltips
         public string night = Language.GetTextValue("Mods.InformativeTooltips.Special.night");
         public string day = Language.GetTextValue("Mods.InformativeTooltips.Special.day");
         public string provides = Language.GetTextValue("Mods.InformativeTooltips.Special.provides");
-        public string regen = Language.GetTextValue("Mods.InformativeTooltips.Buffs.Regen1.Tooltip");
-        public string slightregen = Language.GetTextValue("Mods.InformativeTooltips.Buffs.RegenSlight.Tooltip");
+        public string regen = Language.GetTextValue("Mods.InformativeTooltips.Buffs.Regen1");
+        public string slightregen = Language.GetTextValue("Mods.InformativeTooltips.Buffs.RegenSlight");
         public string moveinfo = Language.GetTextValue("Mods.InformativeTooltips.Special.moveinfo");
         public string werewolf = Language.GetTextValue("Mods.InformativeTooltips.Special.werewolf");
         public string merefolk = Language.GetTextValue("Mods.InformativeTooltips.Special.merefolk");
