@@ -92,7 +92,7 @@ namespace InformativeTooltips.Content
             }
         }
     }
-    public class ThisIsTheOne : GlobalTooltipsBase
+    public class ArmorTooltipStats : GlobalTooltipsBase
     {
         public ThisIsTheOne() : base(2) { }
         public string damage = Language.GetTextValue("Mods.InformativeTooltips.Stat.damage");
